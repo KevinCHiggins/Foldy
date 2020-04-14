@@ -13,26 +13,49 @@ package foldy;
  * from 0 to 1 in X and Y.
  * @author Kevin Higgins
  */
-public class EnvPoint {
-    private double x;
-    private double y;
+public class EnvPoint implements Comparable<EnvPoint> {
+    private int x; //representing how far this point is along the note, in samples
+    private int y; // representing amplitude in **15** bits - POSITIVE VAL ONLY
+    public EnvPoint(int x, int y) {
+	setX(x);
+	setY(y);
+	
+	//System.out.println("EnvPoint w/ X " + getX() + " and Y " + getY());
+    }
+    public EnvPoint(double timeInSecs, int y) { // x pos can be in seconds
+	this(Calc.secsToSamples(timeInSecs), y);
 
-    public double getX() {
+	System.out.println("double to int");	
+    }
+    public int getX() {
 	return x;
     }
 
-    public void setX(double x) {
+    private void setX(int x) {
 	this.x = x;
-	if (x > 1) { x = 1; } else if (x < 0) { x = 0; }
+	if (x < 0) { x = 0; }
     }
 
-    public double getY() {
+    public int getY() {
 	return y;
     }
 
-    public void setY(double y) {
+    private void setY(int y) {
 	this.y = y;	
-	if (x > 1) { x = 1; } else if (x < 0) { x = 0; }
+	if (y < 0) { y = 0; } // positive values only
+	if (y > Short.MAX_VALUE) { y = Short.MAX_VALUE; } // using it as ceiling for amplitude values
+    }
+
+    public int compareTo(EnvPoint ep) {
+	if (ep.x > this.x) {
+	    return -1;
+	}
+	else if (ep.x == this.x) {
+	    return 0;
+	}
+	else {
+	    return 0;
+	}
     }
 
 }

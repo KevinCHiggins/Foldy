@@ -20,7 +20,7 @@ public class Calc {
     }
     // official timing approximator for the whole app!
     public static int secsToSamples(double secs) {
-	System.out.println("In Calc, getting samples in " + secs + " secs, rate " + sampleRate);
+	//System.out.println("In Calc, getting samples in " + secs + " secs, rate " + sampleRate);
 	return (int) (secs * sampleRate);
     }
 

@@ -7,6 +7,7 @@
 package foldy;
 
 import static java.lang.Math.sin;
+import java.util.LinkedList;
 
 /**
  * Represents a single note to be sounded by tapping its data which is
@@ -29,33 +30,64 @@ public class Note {
     private int wavelength; // IN SAMPLES!
     private int length; // IN SAMPLES
     private int offset; // samples
-    private double[] wave; // will hold the actual waveform used
-    public Note(double frequency, double length) { // basic constructor for now
+    private int[] wave; // will hold the actual waveform used
+    private LinkedList<int[]> cachedWaves = new LinkedList<>();
+    
+    // I'd hoped for something more exotic than an envelope for amplitude
+    // for the moment I'll use this to store a fairly well-sampled (dozens?)
+    // quadratic curve
+    private Envelope env; 
+    private int envIndex;
+    private int envRun; // the length in samples of the current segment
+    private int currentRun; // how far through the current segmetn we are, in samples
+    public Note(double frequency, double lengthInSecs) { // basic constructor for now
 	this.offset = 0;
 	this.setFreq(frequency);
-	this.length = Calc.secsToSamples(length);
-	buildWaveformArray(); // basic method to start with
+	this.length = Calc.secsToSamples(lengthInSecs);
+	fillWaveformArray(); // basic method to start with
+	System.out.println("Building note, about to call env, lenght is " + length);
+	env = Envelope.getQuadratic(this.length, Short.MAX_VALUE, true);
     }
-    public double ampFunction() { // linear falloff to start
-	if (offset > 0){
-	    return 1 - (((double) offset) / length);
-	}
-	else {
-	    return 1;
-	}
+    // This should only be called from a single point in Note, as other calls will
+    // suck out data intended for streaming and desync the envelope from the note!!
+    private int ampFunction() { 
+	return env.getNextY();
     }
-    private void buildWaveformArray() {
-	wave = new double[wavelength];
-	for (int i = 0; i < wavelength; i++) {
-	    wave[i] = Math.sin(Math.toRadians(((double) i / wavelength) * 360));
-	    System.out.println((double) i / wavelength + ", " + (((double) i / wavelength) * 360) + ", " + wave[i]);
+    
+    private void fillWaveformArray() {
+	
+	// do a simple caching here:
+	// search for one of same length (obviously needs to be redone for
+	// mixed waveforms) and if none found, insert current
+	int index = 0;
+	boolean match = true;
+	if (cachedWaves.size() > 0) {
+	    while (cachedWaves.get(index).length < wavelength) {
+		index++;
+	    }
+	    if (cachedWaves.get(index).length > wavelength) { // next is too big so no match
+		match = false;
+	    }
+	    else { // match!
+	    wave = cachedWaves.get(index);
+	    }
+	}
+	else { // nothing cached so can't be a match
+	    match = false;
+	}
+
+	if (!match) { // no matching cached wave so make a new one
+	    
+	    wave = Waveform.getFoldedArray(Waveform.SINE, wavelength, 3, Short.MAX_VALUE);
+	    cachedWaves.add(index, wave); // and stow it
+	
 	}
     }
     
     private void setFreq(double hertz) {
 	targetFreq = hertz;
 	wavelength = Calc.secsToSamples(1 / hertz);
-	System.out.println("Wavelength set to " + wavelength + " target " + hertz);
+	//System.out.println("Wavelength set to " + wavelength + " target " + hertz);
     }
     public double getTargetFreq() {
 	return targetFreq;
@@ -74,21 +106,26 @@ public class Note {
 	    amount = getRemainingSamplesAmount();
 	}
 	short[] samples = new short[amount];
+	int counter = 0;
 	for (int i = 0; i < amount; i++) {
-	   
-	    short wavePos = (short) (wave[offset % wavelength]* ampFunction() * 50);
-	    samples[i] = wavePos;
-	    if (wavePos < 0) {
-		for (int j = 0; j < 50 + wavePos; j++) {
-		    System.out.print(" ");
+	    //System.out.println(ampFunction());
+	    samples[i] = (short) (wave[offset % wavelength]* ampFunction() / (double)Short.MAX_VALUE);
+	    //if (samples[i] > 0) {
+	    /*
+	    counter++;
+	    if (counter > 20) {
+		counter = 0;
+		for (int j = 0; j < 30 + (samples[j]/ 500); j++) {
+		System.out.print(" ");
 		}
+	   /* }
+	    for (int j = 30; j < samples[j]/ 500; j++) {
+		System.out.print(" ");
+	    } 
+	    System.out.println("|");
 	    }
-	    else {
-		for (int j = 0; j < wavePos + 50; j++) {
-		    System.out.print(" ");
-		}
-	    }
-	    System.out.println("|" + wavePos);
+	    */
+	    
 	    offset++;
 	}
 	return samples;

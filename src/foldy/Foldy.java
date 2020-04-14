@@ -26,6 +26,11 @@ public class Foldy {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+	/*Envelope q = Envelope.getQuadratic(8, 44100, Short.MAX_VALUE);
+	for (int i = 0; i < 44100; i++) {
+	    //System.out.println(q.getNextY());
+	}
+	*/
 	SoundSetup setup = new SoundSetup();
 	Calc convert = new Calc(setup);
 	SourceDataLine outputJack;
@@ -40,16 +45,12 @@ public class Foldy {
 	    System.out.println("Opened " + lineInfoReport + ", using " + setup.getFormat());
 	    play.testUsing(outputJack);
 	    outputJack.close();
-	} catch (LineUnavailableException ex) {	    
+	}
+	catch (LineUnavailableException ex) {	    
 	    System.out.println("Despite previous check, no line available");
 	    System.exit(1);
 	}
-	/*
-	catch (IOException ioe) {
-	    System.out.println("Input/output exception while using " + setup.getFormat() + ", " + lineInfoReport);
-	    System.exit(1);
-	}
-	*/
+	
     
 
 	

@@ -8,6 +8,7 @@ package foldy;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -27,16 +28,24 @@ public class Processor {
     SourceDataLine output;
     LinkedList<NoiseWindow> queue = new LinkedList<>();
     public void testUsing(SourceDataLine out) {
-	this.output = out;
-	Note n = new Note(1760, .5);
-	queue.add(new NoiseWindow(n, n.getRemainingSamplesAmount()));
-	queue.add(new NoiseWindow(null, 22500)); // a moment's silence
-	n = new Note(880, 1);
-	queue.add(new NoiseWindow(n, n.getRemainingSamplesAmount()));	
-	queue.add(new NoiseWindow(null, 22500)); // a moment's silence	
-	n = new Note(440, 2);
+	FrequencySeries sub = new FrequencySeries(8000, 1);
+	Sequencer seq;
+	//seq = new Sequencer(new int[] {8, 8, 16, 16, 0, 0, 0, 16, 14, 14, 15, 15, 16, 16, 18, 18, 0, 0, 8, 8, 0, 0, 0, 16, 15, 15, 18, 18, 0, 0, 0, 0}, sub);
 	
-	queue.add(new NoiseWindow(n, n.getRemainingSamplesAmount()));
+	/* descending subharmonics
+	int[] vals = new int[13];
+	for (int i = 5; i < 18; i++) {
+	    vals[i - 5] = i;
+	}
+	for (int j : vals) {
+	    System.out.print(j + " ");
+	}
+	seq = new Sequencer(vals, sub);
+	*/
+	//seq = new Sequencer(new int[] {4, 5, 3, 4, 5, 2, 3, 4, 5}, sub);
+	seq = new Sequencer(new int[] {10}, sub);
+	this.output = out;
+	queue = seq.getQueue();
 	output.start();
 	while (true) {
 	    try {
@@ -45,15 +54,15 @@ public class Processor {
 	    }
 	    catch (IOException ioe) {
 		System.out.println("Ran out of notes.");
-		System.exit(1);
+		//System.exit(1);
 	    }
 	}
-    }
+	};
     public void streamQueue() throws IOException { //exception when queue is utterly exhausted
 	
 	if ((output.available() * Calc.sampleRate) > CHUNK_SIZE) { // add a chunk from current NoiseWindow
 	    NoiseWindow audio = queue.peek();
-	    System.out.println("Duration " + audio.getDuration());
+	    //System.out.println("Duration " + audio.getDuration());
 	    if (audio.getDuration() <= 0) { // PROBLEM, WHAT IF NOISEWINDOW HAS LENGTH 0 FROM GET GO?
 		queue.pop();
 		
@@ -64,12 +73,20 @@ public class Processor {
 		// or else all that it has left... not providing guarantees at all!
 		short[] data = audio.takeSamples(CHUNK_SIZE);
 		ByteBuffer byteData = ByteBuffer.allocate(data.length * Calc.bytesPerSample);
+		byteData.order(ByteOrder.LITTLE_ENDIAN);
 		for (short s : data) {
 		    byteData.putShort(s);
 		    
 		}
-		// output whatever you got (it's not guaranteed to be CHUNK_SIZE)
+		
 		//System.out.println("Test byte" + byteData.array()[40]);
+		
+		/*for (int i = 0; i < byteData.array().length; i++) {
+		    System.out.println(byteData.array()[i]);
+		}
+		*/
+		
+		// output whatever you got (it's not guaranteed to be CHUNK_SIZE)
 		output.write(byteData.array(), 0, byteData.array().length);
 		
 	    }
@@ -81,33 +98,6 @@ public class Processor {
 	
     }
     // okay a first try at this: a slice of sound or silence (null note)
-    private class NoiseWindow {
-	private Note note;
-	private int duration; // samples
-	public NoiseWindow(Note n, int duration) {
-	    this.note = n;
-	    this.duration = duration;
-	}
 
-	public int getDuration () {
-	    return duration;
-	}
-	private short[] takeSamples(int amount) {
-	    short[] result;
-	    if (note != null) {
-		result = note.takeSamples(amount);
-	    }
-	    else { // silence is intended
-		short[] silent = new short[amount];
-		for (int i = 0; i < amount; i++) { // DO I NEED IT?
-		    silent[i] = 0;
-		}
-		result = silent;
-	    }
-	    duration = duration - result.length;
-	    return result;
-	}
-	
-    }
 
 }
