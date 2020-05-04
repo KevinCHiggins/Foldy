@@ -12,6 +12,7 @@ import java.lang.IndexOutOfBoundsException;
  *  - be makeable as logarithmic octave divisions, harmonic series, and scales
  *  - have premade series and also ways to build new ones
  *  - hohoho... what about averaging or adding two of them?
+ *  - 22/04/20 multiplying bias, bias by series member
  * @author Kevin Higgins
  */
 public class FrequencySeries {
