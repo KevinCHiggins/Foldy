@@ -14,7 +14,7 @@ package foldy;
  */
 public class Pitch {
     
-    final static int aEquals = 440;
+    final static int aEquals = 110;
     Fraction[] ratios = new Fraction[] {new Fraction(aEquals, 1)};
     public void transpose(Fraction ratio) {
 	Fraction[] ratiosPlusTransposition = new Fraction[ratios.length + 1];

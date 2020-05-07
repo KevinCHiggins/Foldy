@@ -27,6 +27,7 @@ import javax.sound.sampled.SourceDataLine;
  */
 public class Manifester {
     final int BLOCK_SIZE_BYTES = 2048;
+    final boolean LOOPED = false;
     SourceDataLine output;
     private class Segment {
 	Note n;
@@ -36,28 +37,58 @@ public class Manifester {
 	    this.duration = duration;
 	}
     }
-    // okay I'll half-ass this for testing
-    // will just be a mirror of the sequence AND WON'T WORK IF NOTES ARE
-    // SMALLER THAN TATUM
-    // later will: stretch notes for as long as they're playing uninterrupted
-    // and fill in silence and collate together silences
+    // turns a sequence of note attacks and rests into Segments consisting of
+    // either a Note or a null signifying silence) and the duration it should be played
     public Segment[] seqToSegs(int[] seq) {
 	PitchChain pitches = new PitchChain();
-	TempoApproximator time = new TempoApproximator(70);
-	Segment[] toBeCropped = new Segment[seq.length];
+	TempoApproximator time = new TempoApproximator(120);
+	Segment[] segs = new Segment[seq.length * 2]; // worst-case is every note falls short of next tatum
 	Articulation art = new Articulation(44100, Articulation.Env.LINEAR_FALLOFF);
 	Wave w = new Wave(Wave.Form.SINE);
-	int restCounter = 0; // for collating together adjacent rests into one seg
-	int duration = time.getSamplesPerTatum();
-	for (int i = 0; i < seq.length; i++) {
-	    if (seq[i] != -1) {
-		toBeCropped[i] = new Segment(new Note(art, pitches.get(seq[i]), w), duration);
+	int tatumCounter = 0; 
+	int segCounter = 0;
+	int tatumLength = time.getSamplesPerTatum();
+	while (tatumCounter < seq.length) {
+	    // find next note
+	    int searchForNext = tatumCounter;
+	    do  {
+		searchForNext++;
+		if (searchForNext == seq.length) break;
+	    } while (seq[searchForNext] == -1);
+	    // calculate the span of time until that next note
+	    int span = (searchForNext - tatumCounter) * tatumLength;
+	    System.out.println("Span "  + span);
+	    // if tatumCounter is 0 meaning we're at the sequence start,
+	    // and it starts with a rest
+	    if (tatumCounter == 0 && (seq[0] == -1)) {
+		// lay down a rest spanning the time till the next note
+		segs[segCounter++] = new Segment(null, span);
+		
+	    } // special case, there are no more notes left and we want the last note to ring out
+	    else if (!LOOPED & searchForNext == seq.length) {
+		System.out.println("Trying to ring out");
+		segs[segCounter++] = new Segment(new Note(art, pitches.get(seq[tatumCounter]), w), art.duration);
 	    }
-	    else {
-		toBeCropped[i] = new Segment(null, duration);
+	    else { // if not, we're in the typical case where we want to lay
+		// down the note attacked at position tatumCounter;
+		// either fill the span with its duration's worth of current note
+		// or fill it with all of the current note and a silence
+		if (art.duration >= span) {
+		segs[segCounter++] = new Segment(new Note(art, pitches.get(seq[tatumCounter]), w), span);
+		}
+		else {
+		    segs[segCounter++] = new Segment(new Note(art, pitches.get(seq[tatumCounter]), w), art.duration);
+		    segs[segCounter++] = new Segment(null, span - art.duration); // silence
+		}
 	    }
+
+	    tatumCounter = searchForNext;
 	}
-	return toBeCropped;
+	Segment[] finalSegs = new Segment[segCounter];
+	for (int i = 0; i < segCounter; i++) {
+	    finalSegs[i] = segs[i];
+	}
+	return finalSegs;
     }
     public void testUsing(SourceDataLine out) {
 	int[] seq = new int[] {69, 71, -1, -1, -1, 72, -1, 69, 71};
@@ -116,14 +147,6 @@ public class Manifester {
 		    sizeInSamples--;
 		    //System.out.println(sizeInSamples);
 		}
-		//System.out.println(counter);
-		//System.out.println("BUffer size " + byteData.capacity());
-		//System.out.println("Test byte" + byteData.array()[40]);
-
-		/*for (int i = 0; i < byteData.array().length; i++) {
-		    System.out.println(byteData.array()[i]);
-		}*/
-		// output whatever you got (it's not guaranteed to be BLOCK_SIZE_BYTES)
 		output.write(byteData.array(), 0, byteData.array().length);
 	    }
 	    else {
@@ -133,7 +156,5 @@ public class Manifester {
 	} while (audio.length - counter > 0);
 	//System.out.println("Done streaming.");
     }
-    // okay a first try at this: a slice of sound or silence (null note)
-
 
 }

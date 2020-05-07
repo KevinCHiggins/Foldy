@@ -33,12 +33,14 @@ public class Note {
 	int remainderInSamples = duration % chunkSize;
 	short[] played = new short[duration];
 	int index = 0;
-
+	System.out.println("Chunk size " + chunkSize + ", count " + chunksCount + ", env points " + chunkLevels.length);
+	
 	for (int i = 0; i < chunksCount; i++) {
 	    for(int j = 0; j < chunkSize; j++) {
 		played[index] = (short)((chunk[j] * chunkLevels[i]) / Short.MAX_VALUE);
 
 		index++;
+		//System.out.println("Index" + index);
 	    }
 	}
 	for (int j = 0; j < remainderInSamples; j++) {
@@ -99,6 +101,7 @@ public class Note {
     private void setChunkLevels(Articulation art) {
 	
 	int pointsCount = art.duration / chunkSize; 
+	System.out.println("Setting chunk level points. Duration " + art.duration + " chunk size " + chunkSize);
 	if (remainderInSamples > 0) pointsCount += 1; // add a volume point for start of remainder
 	chunkLevels = new short[pointsCount];
 	// gonna use Short.MAX_VALUE as my unit for proportion of note length
