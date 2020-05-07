@@ -43,7 +43,7 @@ public class Manifester {
     // and fill in silence and collate together silences
     public Segment[] seqToSegs(int[] seq) {
 	PitchChain pitches = new PitchChain();
-	TempoApproximator time = new TempoApproximator(100);
+	TempoApproximator time = new TempoApproximator(70);
 	Segment[] toBeCropped = new Segment[seq.length];
 	Articulation art = new Articulation(44100, Articulation.Env.LINEAR_FALLOFF);
 	Wave w = new Wave(Wave.Form.SINE);

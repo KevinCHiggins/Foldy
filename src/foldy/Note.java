@@ -15,7 +15,8 @@ public class Note {
     int chunkMultiple; // how many times the waveform will cycle in the chunk
     //int fullChunksCount; // how many full chunks are in the note
     Articulation art;
-    short[] chunks;
+    short[] chunk;
+    short[] chunkLevels; // envelope point for the START of every chunk including any partial final chunk
     Fraction actualWavelength; // will store the achieved wavelength after chunking/approximation
     
     // how many samples there are of any final, partial chunk... this way Notes have sample accurate duration
@@ -26,21 +27,22 @@ public class Note {
 	return playFor(durationDesired);
     }
     public short[] playFor(int duration) {
-	System.out.println("Test value from Note " + chunks[0]);
-	int fullChunksCount = duration / chunkSize;
+	System.out.println("Test value from Note " + chunk[0]);
+	// chunks count GIVEN THIS DURATION!! Different from fullChunksCount
+	int chunksCount = duration / chunkSize; 
 	int remainderInSamples = duration % chunkSize;
 	short[] played = new short[duration];
 	int index = 0;
 
-	for (int i = 0; i < fullChunksCount; i++) {
+	for (int i = 0; i < chunksCount; i++) {
 	    for(int j = 0; j < chunkSize; j++) {
-		played[index] = chunks[j];
+		played[index] = (short)((chunk[j] * chunkLevels[i]) / Short.MAX_VALUE);
 
 		index++;
 	    }
 	}
-	for (int i = 0; i < remainderInSamples; i++) {
-	    played[index] = chunks[i];
+	for (int j = 0; j < remainderInSamples; j++) {
+	    played[index] = (short)((chunk[j] * chunkLevels[chunkLevels.length - 1]) / Short.MAX_VALUE);
 	}
 	// a tiny linear fadeout to mitigate clicking
 	int fadeLengthMillis = 20; // ms
@@ -60,6 +62,7 @@ public class Note {
     public Note(Articulation art, Pitch pitch, Wave wave) {
 	sizeChunk(pitch);
 	makeChunk(wave);
+	
 	setChunkLevels(art);
 	this.art = art;
 	//fullChunksCount = art.duration / chunkSize;
@@ -79,7 +82,8 @@ public class Note {
 	// wavelength might not be an int if there are multiple cycles per chunk!
 	actualWavelength = new Fraction(chunkSize, chunkMultiple);
 	
-	chunks = new short[chunkSize];
+	chunk = new short[chunkSize];
+	
     }
 
     private void makeChunk(Wave wave) { // not bothering to check waveform right now
@@ -87,12 +91,25 @@ public class Note {
 	int min = Short.MIN_VALUE;
 	double revsBySamples = 2.0 * Math.PI * chunkMultiple / chunkSize;
 	for (int i = 0; i < chunkSize; i++) {
-	    chunks[i] = (short)(max * Math.sin(revsBySamples * i));
+	    chunk[i] = (short)(max * Math.sin(revsBySamples * i));
 	    
 	}
     }
     
     private void setChunkLevels(Articulation art) {
+	
+	int pointsCount = art.duration / chunkSize; 
+	if (remainderInSamples > 0) pointsCount += 1; // add a volume point for start of remainder
+	chunkLevels = new short[pointsCount];
+	// gonna use Short.MAX_VALUE as my unit for proportion of note length
+	// to keep things int
+	// this variable will hold how many samples are still to come
+	// counting from the start of the current chunk
+	int samplesAhead;
+	for (int i = 0; i < pointsCount; i++) {
+	    samplesAhead = (art.duration - (i * chunkSize));
+	    chunkLevels[i] = (short)((samplesAhead * Short.MAX_VALUE) / art.duration);
+	}
 	
     }
     public int getDuration() {
