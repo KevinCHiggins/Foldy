@@ -13,11 +13,12 @@ package foldy;
 import java.awt.*;
 import javax.swing.*;
 public class OmniPlotWindow extends JFrame {
-    public OmniPlotWindow (int[] sequence, int upperBound, int lowerBound, int xStep) {
+    public OmniPlotWindow (short[] sequence, int upperBound, int lowerBound, int xStep) {
 	OmniPlot plot = new OmniPlot(sequence, upperBound, lowerBound, xStep);
 	this.add(plot);
 	this.setBounds(100,100,800,800);
 	this.setVisible(true);		
+	this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 	UIManager.put("swing.boldMetal", Boolean.FALSE);
     }
 }

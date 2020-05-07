@@ -20,8 +20,6 @@ public class DiffAnalyser {
     double slope;
     double currentY;
     int currentX;
-    // Will make a (functionally equivalent) constructor with EnvPoints, later
-    // once I've fixed their types
     
     public DiffAnalyser(int startX, int startY, int endX, int endY) {
 	this.startX = startX;

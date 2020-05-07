@@ -35,7 +35,7 @@ public class Foldy {
 	Calc convert = new Calc(setup);
 	SourceDataLine outputJack;
 	AudioFormat format = setup.getFormat();
-	Processor play = new Processor();
+	Manifester play = new Manifester();
 	String lineInfoReport = "";
 	try {
 	    outputJack = setup.getOutputJack();
@@ -44,12 +44,20 @@ public class Foldy {
 	    System.out.println(setup.reportAvailableMixers());
 	    System.out.println("Opened " + lineInfoReport + ", using " + setup.getFormat());
 	    play.testUsing(outputJack);
+	    while (outputJack.available() < outputJack.getBufferSize()) {
+	    System.out.println("Waiting for buffer to empty, currently " + outputJack.available());
+		Thread.sleep(50);
+	    }
+	    System.out.println("Buffer empty, at " + outputJack.available() + " but still waiting 25ms more.");
+	    Thread.sleep(25);
+	    System.out.println("Closing jack.");
 	    outputJack.close();
 	}
 	catch (LineUnavailableException ex) {	    
 	    System.out.println("Despite previous check, no line available");
 	    System.exit(1);
 	}
+	catch (InterruptedException ex) {}
 	
     
 

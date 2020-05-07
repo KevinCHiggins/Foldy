@@ -6,129 +6,96 @@
 
 package foldy;
 
-import static java.lang.Math.sin;
-import java.util.LinkedList;
-
 /**
- * Represents a single note to be sounded by tapping its data which is
- * generated on request. A Note is like sampled audio conceptually, in that
- * it always evaluates the same, to digital data (at the app's given
- * sample rate etc.). ONCE PLAYED, a Note can never be played again!
- * Parameters include length (in samples but set in seconds), an amplitude
- * curve (we'll start with just a line), a function (later to be spun out into
- * a class) to generate the wave from freq and amp curve, and a wavelength
- * in samples (set in Hz). 
- * (The wave creating function is going to become wave folding later.)
- * Because of my current level of knowledge, this class won't allow
- * pitch envelopes or curves right now. All I'll do is repeat copies
- * of a whole waveform while diminishing amplitude to get a simple attenuating
- * tone.
+ *
  * @author Kevin Higgins
  */
 public class Note {
-    private double targetFreq;
-    private int wavelength; // IN SAMPLES!
-    private int length; // IN SAMPLES
-    private int offset; // samples
-    private int[] wave; // will hold the actual waveform used
-    private LinkedList<int[]> cachedWaves = new LinkedList<>();
+    int chunkSize; // many samples per chunk - always should be more than 220
+    int chunkMultiple; // how many times the waveform will cycle in the chunk
+    //int fullChunksCount; // how many full chunks are in the note
+    Articulation art;
+    short[] chunks;
+    Fraction actualWavelength; // will store the achieved wavelength after chunking/approximation
     
-    // I'd hoped for something more exotic than an envelope for amplitude
-    // for the moment I'll use this to store a fairly well-sampled (dozens?)
-    // quadratic curve
-    private Envelope env; 
-    private int envIndex;
-    private int envRun; // the length in samples of the current segment
-    private int currentRun; // how far through the current segmetn we are, in samples
-    public Note(double frequency, double lengthInSecs) { // basic constructor for now
-	this.offset = 0;
-	this.setFreq(frequency);
-	this.length = Calc.secsToSamples(lengthInSecs);
-	fillWaveformArray(); // basic method to start with
-	System.out.println("Building note, about to call env, lenght is " + length);
-	env = Envelope.getQuadratic(this.length, Short.MAX_VALUE, true);
-    }
-    // This should only be called from a single point in Note, as other calls will
-    // suck out data intended for streaming and desync the envelope from the note!!
-    private int ampFunction() { 
-	return env.getNextY();
-    }
+    // how many samples there are of any final, partial chunk... this way Notes have sample accurate duration
+    int remainderInSamples; 
     
-    private void fillWaveformArray() {
-	
-	// do a simple caching here:
-	// search for one of same length (obviously needs to be redone for
-	// mixed waveforms) and if none found, insert current
+    public short[] playShortBy(int shortfall) {
+	int durationDesired = getDuration() - shortfall;
+	return playFor(durationDesired);
+    }
+    public short[] playFor(int duration) {
+	System.out.println("Test value from Note " + chunks[0]);
+	int fullChunksCount = duration / chunkSize;
+	int remainderInSamples = duration % chunkSize;
+	short[] played = new short[duration];
 	int index = 0;
-	boolean match = true;
-	if (cachedWaves.size() > 0) {
-	    while (cachedWaves.get(index).length < wavelength) {
+
+	for (int i = 0; i < fullChunksCount; i++) {
+	    for(int j = 0; j < chunkSize; j++) {
+		played[index] = chunks[j];
+
 		index++;
 	    }
-	    if (cachedWaves.get(index).length > wavelength) { // next is too big so no match
-		match = false;
-	    }
-	    else { // match!
-	    wave = cachedWaves.get(index);
+	}
+	for (int i = 0; i < remainderInSamples; i++) {
+	    played[index] = chunks[i];
+	}
+	// a tiny linear fadeout to mitigate clicking
+	int fadeLengthMillis = 20; // ms
+	int fadeLengthSamples = Calc.secsToSamples((double) fadeLengthMillis / 1000);
+	System.out.println(Calc.secsToSamples(0.2));
+	if (played.length > (fadeLengthSamples * 2)) {
+	    System.out.println("FADE " + fadeLengthSamples);
+	    // fadeout using integer arithmetic
+	    for (int i = 0; i < fadeLengthSamples; i++) {
+		int multiplier = (Short.MAX_VALUE * i) / fadeLengthSamples;
+		//played[i] = (short)(played[i] * multiplier / Short.MAX_VALUE);
+		played[played.length - (i + 1)] = (short)(played[played.length - (i + 1)] * multiplier / Short.MAX_VALUE);
 	    }
 	}
-	else { // nothing cached so can't be a match
-	    match = false;
-	}
-
-	if (!match) { // no matching cached wave so make a new one
-	    
-	    wave = Waveform.getFoldedArray(Waveform.SINE, wavelength, 3, Short.MAX_VALUE);
-	    cachedWaves.add(index, wave); // and stow it
+	return played;
+    }
+    public Note(Articulation art, Pitch pitch, Wave wave) {
+	sizeChunk(pitch);
+	makeChunk(wave);
+	setChunkLevels(art);
+	this.art = art;
+	//fullChunksCount = art.duration / chunkSize;
+	//remainderInSamples = art.duration % chunkSize;
+    }
+    private void sizeChunk(Pitch pitch) {
+	chunkSize = Calc.sampleRate * pitch.getDenominator() / pitch.getNumerator();
+	chunkMultiple = 1;
 	
+	while (chunkSize < 220) {
+	    chunkMultiple++;
+	    chunkSize = (Calc.sampleRate * chunkMultiple * pitch.getDenominator() / pitch.getNumerator());
+	}
+	
+	System.out.println("In note, mult " + chunkMultiple + ", size " + chunkSize);
+	
+	// wavelength might not be an int if there are multiple cycles per chunk!
+	actualWavelength = new Fraction(chunkSize, chunkMultiple);
+	
+	chunks = new short[chunkSize];
+    }
+
+    private void makeChunk(Wave wave) { // not bothering to check waveform right now
+	int max = Short.MAX_VALUE / 2;
+	int min = Short.MIN_VALUE;
+	double revsBySamples = 2.0 * Math.PI * chunkMultiple / chunkSize;
+	for (int i = 0; i < chunkSize; i++) {
+	    chunks[i] = (short)(max * Math.sin(revsBySamples * i));
+	    
 	}
     }
     
-    private void setFreq(double hertz) {
-	targetFreq = hertz;
-	wavelength = Calc.secsToSamples(1 / hertz);
-	//System.out.println("Wavelength set to " + wavelength + " target " + hertz);
+    private void setChunkLevels(Articulation art) {
+	
     }
-    public double getTargetFreq() {
-	return targetFreq;
+    public int getDuration() {
+	return art.duration;
     }
-    public int getWavelengthInSamples() {
-	return wavelength;
-    }
-    public int getRemainingSamplesAmount() {
-	return length - offset;
-    }
-    public short[] takeSamples(int amount) {
-	// this is not great - providing no guarantees -
-	// either return amount or whatever's left. I guess it's got a crude
-	// intuitive logic.
-	if (getRemainingSamplesAmount() < amount) {
-	    amount = getRemainingSamplesAmount();
-	}
-	short[] samples = new short[amount];
-	int counter = 0;
-	for (int i = 0; i < amount; i++) {
-	    //System.out.println(ampFunction());
-	    samples[i] = (short) (wave[offset % wavelength]* ampFunction() / (double)Short.MAX_VALUE);
-	    //if (samples[i] > 0) {
-	    /*
-	    counter++;
-	    if (counter > 20) {
-		counter = 0;
-		for (int j = 0; j < 30 + (samples[j]/ 500); j++) {
-		System.out.print(" ");
-		}
-	   /* }
-	    for (int j = 30; j < samples[j]/ 500; j++) {
-		System.out.print(" ");
-	    } 
-	    System.out.println("|");
-	    }
-	    */
-	    
-	    offset++;
-	}
-	return samples;
-    }
-
 }

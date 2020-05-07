@@ -14,7 +14,7 @@ public class OmniPlot extends JPanel {
     Point startOfPlot = new Point();
     Point startOfSquare = new Point();
     Point result = new Point();
-    int[] sequence;
+    short[] sequence;
     private double side = 0;
     private double x;
     private double y;
@@ -24,7 +24,7 @@ public class OmniPlot extends JPanel {
     private int yStep;
     private double a = 100;
     private double b = 100;
-    public OmniPlot (int[] sequence, int upperBound, int lowerBound, int xStep) {
+    public OmniPlot (short[] sequence, int upperBound, int lowerBound, int xStep) {
 	// width is determined by caller
 	this.sequence = sequence;
 	plotWidth = sequence.length / xStep; 
@@ -46,7 +46,7 @@ public class OmniPlot extends JPanel {
 	    int oldX = 0;
 	    int oldY = yCentre;
 	    for (int x = 0; x < plotWidth; x++) {
-		int y = yCentre + sequence[x] / yStep;
+		int y = yCentre + sequence[x * xStep] / yStep;
 		g.drawLine(x, y, oldX, oldY);
 		oldX = x;
 		oldY = y;

@@ -44,10 +44,10 @@ public class SoundSetup {
 	    System.out.println("No line found for " + format);
 	    System.exit(1);
 	}
-	
-	return (SourceDataLine) AudioSystem.getLine(outputJackAttr);
-	    
-	
+	SourceDataLine l = (SourceDataLine) AudioSystem.getLine(outputJackAttr);
+	l.addLineListener(new OutputJackListener());
+	return l;
+
     }
     public AudioFormat getFormat() {
 	return format;
