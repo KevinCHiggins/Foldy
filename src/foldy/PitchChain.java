@@ -28,9 +28,15 @@ public class PitchChain {
 	dSharp.transpose(new Fraction(45, 32));
 	Pitch e = new Pitch();
 	e.transpose(new Fraction(3, 2));
+	Pitch lowE = new Pitch();
+	lowE.transpose(new Fraction(3, 4));
+	Pitch lowG = new Pitch();
+	lowG.transpose(new Fraction(8, 9));
 	for (int i = 0; i < chain.length; i++) {
 	    chain[i] = a;
 	}
+	chain[64] = lowE;
+	chain[67] = lowG;
 	chain[70] = aSharp;
 	chain[71] = b;
 	chain[72] = c;
