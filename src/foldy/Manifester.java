@@ -41,10 +41,10 @@ public class Manifester {
     // either a Note or a null signifying silence) and the duration it should be played
     public Segment[] seqToSegs(int[] seq) {
 	PitchChain pitches = new PitchChain();
-	TempoApproximator time = new TempoApproximator(120);
+	TempoApproximator time = new TempoApproximator(197);
 	Segment[] segs = new Segment[seq.length * 2]; // worst-case is every note falls short of next tatum
 	Articulation art = new Articulation(44100, Articulation.Env.LINEAR_FALLOFF);
-	Wave w = new Wave(Wave.Form.SINE);
+	Wave w = new Wave(Wave.Form.SINE, new Fraction(1, 4));
 	int tatumCounter = 0; 
 	int segCounter = 0;
 	int tatumLength = time.getSamplesPerTatum();
@@ -57,7 +57,7 @@ public class Manifester {
 	    } while (seq[searchForNext] == -1);
 	    // calculate the span of time until that next note
 	    int span = (searchForNext - tatumCounter) * tatumLength;
-	    System.out.println("Span "  + span);
+	    System.out.println("Filling timespan of " + span + " samples.");
 	    // if tatumCounter is 0 meaning we're at the sequence start,
 	    // and it starts with a rest
 	    if (tatumCounter == 0 && (seq[0] == -1)) {
@@ -74,10 +74,13 @@ public class Manifester {
 		// either fill the span with its duration's worth of current note
 		// or fill it with all of the current note and a silence
 		if (art.duration >= span) {
-		segs[segCounter++] = new Segment(new Note(art, pitches.get(seq[tatumCounter]), w), span);
+		    System.out.println("Segment " + segCounter + " has span shorter than note duration of " + art.duration);
+		    segs[segCounter++] = new Segment(new Note(art, pitches.get(seq[tatumCounter]), w), span);
 		}
 		else {
+		    System.out.println("Segment " + segCounter + " has span longer than note duration of " + art.duration);
 		    segs[segCounter++] = new Segment(new Note(art, pitches.get(seq[tatumCounter]), w), art.duration);
+		    System.out.println("Adding segment of silence length " + (span - art.duration));
 		    segs[segCounter++] = new Segment(null, span - art.duration); // silence
 		}
 	    }
@@ -91,37 +94,63 @@ public class Manifester {
 	return finalSegs;
     }
     public void testUsing(SourceDataLine out) {
-	int[] seq = new int[] {69, 71, -1, -1, -1, 72, -1, 69, 71};
+	int[] seq = new int[] {74, 74, 74, 74, 74, 74, 74, 74, 69, 69, 69, -1, 74};
 	//int[] seq = new int[] {69};
 	Segment[] segs = seqToSegs(seq); 
 	System.out.println("Segments " + segs.length);
-	Pitch b = new Pitch();
-	b.transpose(new Fraction("9/8"));
-	//Note n = new Note(new Articulation(44100, Articulation.Env.LINEAR_FALLOFF), new Pitch(), new Wave(Wave.Form.SINE));
-	//System.out.println(" " + n.chunkSize);
-	//System.exit(1);
-	this.output = out;
-	output.start();
-	try {
-	    for (int i = 0; i < segs.length; i++) {
-		System.out.println("Segment " + i + ", dur " + segs[i].duration);
-		if (segs[i].n != null) {
-		    streamAll(segs[i].n.playFor(segs[i].duration));
-		    //short[] test = segs[i].n.playFor(segs[i].duration);
-		    //OmniPlotWindow display = new OmniPlotWindow(segs[i].n.playShortBy(0), Short.MAX_VALUE, Short.MIN_VALUE, 20);
+	int fullLength = 0;
+	for (int i = 0; i < segs.length; i++) {
+	    System.out.println("Seg " + i + " dur " + segs[i].duration);
+	    fullLength += segs[i].duration;
+	}
+	System.out.println(fullLength + " shorts is " + (fullLength * Calc.bytesPerSample) + " bytes.");
+	// lash it all into a buffer
+	ByteBuffer full = ByteBuffer.allocate(fullLength * Calc.bytesPerSample);
+	full.order(ByteOrder.LITTLE_ENDIAN);
+	for (int i = 0; i < segs.length; i++) {
+	    if (segs[i].n != null) {
+		//System.out.println("Buffering seg " + i + " dur " + segs[i].duration);
+		short[] audio = segs[i].n.playFor(segs[i].duration);
+		int counter = 0;
+		for (; counter < segs[i].duration; counter++) {
+		    //System.out.println("Putting short " + counter + " from seg " + i + " at position " + full.position());
+		    full.putShort(audio[counter]);
 		}
-		else {
-		    streamZeros(segs[i].duration);
+		//System.out.println(" --- Put " + counter + " shorts, ByteBuffer capacity left " + full.remaining());
+	    }
+	    else {
+		short[] audio = new short[segs[i].duration];
+		for (int counter = 0; counter < segs[i].duration; counter++) {
+		    //System.out.println("Putting short " + counter + " from seg " + i);
+		    full.putShort((short)0);
+		    counter++;
 		}
-		//System.out.println("Streamed");
 	    }
 	}
-	catch (IOException ioe) {
-	    System.out.println("Ran out of notes.");
-	    //System.exit(1);
-	}
-	//try {Thread.sleep(1000); }catch (InterruptedException e){};
 	
+	byte[] bytes = full.array();
+	RawAudioWarehouser raw = new RawAudioWarehouser();
+	raw.save(bytes);
+	int counter = bytes.length;
+	out.start();
+	do {
+	    //System.out.println(counter);
+	    if (out.available() > BLOCK_SIZE_BYTES) {
+		if (counter > BLOCK_SIZE_BYTES) { // typical case
+		    //System.out.println("Out" + counter);
+		    out.write(bytes, bytes.length - counter, BLOCK_SIZE_BYTES);
+		    counter -= BLOCK_SIZE_BYTES;
+		    
+		}
+		else {
+		    System.out.println("End");
+		    out.write(bytes, bytes.length-counter, counter);
+		    counter = 0;
+		    //break;
+		}
+	    }
+
+	} while (counter > 0);
 	
 	
     }

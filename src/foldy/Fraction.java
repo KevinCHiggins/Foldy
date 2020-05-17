@@ -18,6 +18,16 @@ public class Fraction {
 	this.numerator = numerator;
 	this.denominator = denominator;
     }
+    public int by(int multiplier) {
+	multiplier = multiplier * numerator;
+	multiplier = multiplier / denominator;
+	return multiplier;
+    }
+    public int inverseBy(int multiplier) {
+	multiplier = multiplier * denominator;
+	multiplier = multiplier / numerator;
+	return multiplier;
+    }
     // this only parses fractions of the form "36/39" or "12" (improper fraction)
     public Fraction(String s) {
 	char[] ar = s.toCharArray();

@@ -8,13 +8,13 @@ package foldy;
 
 /**
  * for the moment, I'll rough this with a bare array with a bounds test. -1 
- * only means a rest. 60 is the middle note and they can range from 0-128.
+ * is the only value signifying a rest. 60 is the middle note and they can range from 0-128.
  * If the sequencer is played past its end, it will keep returning rests
- * unless it's looped
+ * 
  * @author Kevin Higgins
  */
 public class Sequence {
-    boolean looped = false; // for later
+    boolean looped = false; // FIXME this has to make sense with the Segment[] looping-------------------------------
     private int[] sequence;
     
     int playHead; // index for getting values out in order

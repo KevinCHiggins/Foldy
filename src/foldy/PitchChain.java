@@ -22,6 +22,12 @@ public class PitchChain {
 	c.transpose(new Fraction(6, 5));
 	Pitch cSharp = new Pitch();
 	cSharp.transpose(new Fraction(5, 4));
+	Pitch d = new Pitch();
+	d.transpose(new Fraction(4, 3));
+	Pitch dSharp = new Pitch();
+	dSharp.transpose(new Fraction(45, 32));
+	Pitch e = new Pitch();
+	e.transpose(new Fraction(3, 2));
 	for (int i = 0; i < chain.length; i++) {
 	    chain[i] = a;
 	}
@@ -29,6 +35,9 @@ public class PitchChain {
 	chain[71] = b;
 	chain[72] = c;
 	chain[73] = cSharp;
+	chain[74] = d;
+	chain[75] = dSharp;
+	chain[76] = e;
     }
     public Pitch get(int index) {
 	return chain[index];
