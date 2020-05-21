@@ -7,10 +7,12 @@
             <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Chunk.java</file>
             <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Pitch.java</file>
             <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Fraction.java</file>
-            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/PitchChain.java</file>
             <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Manifester.java</file>
             <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/TempoApproximator.java</file>
+            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/RootFinder.java</file>
             <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Wave.java</file>
+            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Gamut.java</file>
+            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/RatioSeries.java</file>
         </group>
     </open-files>
 </project-private>

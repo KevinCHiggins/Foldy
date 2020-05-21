@@ -28,7 +28,7 @@ public class Chunk {
 	    multiple++;
 	    size = (Calc.sampleRate * multiple * pitch.getDenominator() / pitch.getNumerator());
 	}
-	System.out.println("In note, mult " + multiple + ", size " + size);
+	System.out.println("In chunk, mult " + multiple + ", size " + size);
 	chunk = new short[size];
     }
     

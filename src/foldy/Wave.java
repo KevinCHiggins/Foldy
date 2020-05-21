@@ -30,8 +30,9 @@ public class Wave {
 	return functionFolded(sample, size, multiple);
     }
     // assumes use of normalisedFunction has multiplied amplitude by the 
-    // inverse of threshold and folds at Short.MAX_VALUE
-    // to avoid loss of resolution incurred by a scale-up
+    // inverse of threshold and then folds at Short.MAX_VALUE,
+    // to avoid loss of resolution incurred by a scale-up (final result
+    // is normalised to Short.MAX_VALUE
     public short functionFolded(int sample, int size, int multiple) {
 	int max = Short.MAX_VALUE;
 	int toBeFolded = normalisedFunction(sample, size, multiple);
@@ -58,7 +59,7 @@ public class Wave {
 	double result;
 	if (form == Form.SINE) {
 	    double revsBySamples = 2.0 * Math.PI * multiple / size; // only calc when needed, obvs!
-	    result = (Short.MAX_VALUE * Math.sin(revsBySamples * sample));
+	    result = (Short.MAX_VALUE * bhaskara(revsBySamples * sample));
 	    System.out.println("Wave val " + result + " at sample " + sample);
 	}
 	else if (form == Form.SAW) {
@@ -86,6 +87,20 @@ public class Wave {
 	//return (int) result;
 	return threshold.inverseBy((int) result);
     } 
+    private double bhaskara(double arg) {
+	double result;
+	arg = (arg % (2 * Math.PI));
+	if (arg < Math.PI) {
+	   result = (16 * arg * (Math.PI - arg))/((5*Math.PI*Math.PI) - ((4*arg)*(Math.PI -arg)));
+	}
+	else {
+	    arg = arg - Math.PI;
+	    result = 0 - (16 * arg * (Math.PI - arg))/((5*Math.PI*Math.PI) - ((4*arg)*(Math.PI -arg)));
+	}
+	System.out.println("Bhaskara approximation of sine of " + arg + ": " + result + ", actual: " + Math.sin(arg));
+	
+	return result;
+    }
     private short function(int sample, int size, int multiple) {
 	//I do the divisions each time to take advantage of the greater
 	// precision of int division thanks to scaling the sample position int by
@@ -94,17 +109,20 @@ public class Wave {
 	double result;
 	if (form == Form.SINE) {
 	    double revsBySamples = 2.0 * Math.PI * multiple / size; // only calc when needed, obvs!
-	    result = (short) (Short.MAX_VALUE * Math.sin(revsBySamples * sample));
-	    System.out.println("Wave val " + result + " at sample " + sample);
+	    // BHASKARA THE FIRST
+	    // (16x(pi - x))/5(pi^2) - rx(pi -x)
+	    
+	    result = (short) (Short.MAX_VALUE * bhaskara(revsBySamples * sample));
+	    System.out.println("Wave val for sine " + result + " at sample " + sample);
 	}
 	else if (form == Form.SAW) {
 	    result = (short) ((sample * Short.MAX_VALUE * 2 * multiple) / size);
-	    System.out.println("Wave val " + result + " at sample " + sample);
+	    System.out.println("Wave val for saw " + result + " at sample " + sample);
 	}
 	else if (form == Form.SQUARE) {
 	    result = ((sample * Short.MAX_VALUE * multiple * 2) / size) > (Short.MAX_VALUE / 2)? 1 : -1;
 	    result = result * Short.MAX_VALUE;
-	    System.out.println("Wave val " + result + " at sample " + sample);
+	    System.out.println("Wave val for square " + result + " at sample " + sample);
 	}
 	else if (form == Form.TRIANGLE) {
 	    // x = m - abs(i % (2*m) - m

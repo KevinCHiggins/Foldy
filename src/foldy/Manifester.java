@@ -40,11 +40,11 @@ public class Manifester {
     // turns a sequence of note attacks and rests into Segments consisting of
     // either a Note or a null signifying silence) and the duration it should be played
     public Segment[] seqToSegs(int[] seq) {
-	PitchChain pitches = new PitchChain();
+	Gamut pitches = new Gamut();
 	TempoApproximator time = new TempoApproximator(128, 2);
 	Segment[] segs = new Segment[seq.length * 2]; // worst-case is every note falls short of next tatum
 	Articulation art = new Articulation(44100, Articulation.Env.LINEAR_FALLOFF);
-	Wave w = new Wave(Wave.Form.SINE, new Fraction(1, 4));
+	Wave w = new Wave(Wave.Form.SINE);
 	int tatumCounter = 0; 
 	int segCounter = 0;
 	int tatumLength = time.getSamplesPerTatum();
@@ -94,7 +94,7 @@ public class Manifester {
 	return finalSegs;
     }
     public void testUsing(SourceDataLine out) {
-	int[] seq = new int[] {69, 69, 67, 69, -1, 64, -1, 64, 69, 74, 73, 69};
+	int[] seq = new int[] {69, 71, 73, 74, 76, 78, 80, 81, 83, 85};
 	//int[] seq = new int[] {69};
 	Segment[] segs = seqToSegs(seq); 
 	System.out.println("Segments " + segs.length);

@@ -10,9 +10,10 @@ package foldy;
  *
  * @author Kevin Higgins
  */
-public class PitchChain {
+public class Gamut {
     private Pitch[] chain = new Pitch[128];
-    public PitchChain() { // TESTING ONLY - SHOULD BE USING RatioSeries!!------------------------
+    public Gamut() { // TESTING ONLY - SHOULD BE USING RatioSeries!!------------------------
+	/*
 	Pitch a = new Pitch();
 	Pitch aSharp = new Pitch();
 	aSharp.transpose(new Fraction(15, 16));
@@ -32,9 +33,11 @@ public class PitchChain {
 	lowE.transpose(new Fraction(3, 4));
 	Pitch lowG = new Pitch();
 	lowG.transpose(new Fraction(8, 9));
+	*/
 	for (int i = 0; i < chain.length; i++) {
-	    chain[i] = a;
+	    chain[i] = new Pitch(i);
 	}
+	/*
 	chain[64] = lowE;
 	chain[67] = lowG;
 	chain[70] = aSharp;
@@ -44,6 +47,7 @@ public class PitchChain {
 	chain[74] = d;
 	chain[75] = dSharp;
 	chain[76] = e;
+*/
     }
     public Pitch get(int index) {
 	return chain[index];
