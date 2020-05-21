@@ -41,10 +41,10 @@ public class Manifester {
     // either a Note or a null signifying silence) and the duration it should be played
     public Segment[] seqToSegs(int[] seq) {
 	Gamut pitches = new Gamut();
-	TempoApproximator time = new TempoApproximator(128, 2);
+	TempoApproximator time = new TempoApproximator(66, 3);
 	Segment[] segs = new Segment[seq.length * 2]; // worst-case is every note falls short of next tatum
-	Articulation art = new Articulation(44100, Articulation.Env.LINEAR_FALLOFF);
-	Wave w = new Wave(Wave.Form.SINE);
+	Articulation art = new Articulation(20100, Articulation.Env.LINEAR_FALLOFF);
+	Wave w = new Wave(Wave.Form.SINE, new Fraction(1, 3));
 	int tatumCounter = 0; 
 	int segCounter = 0;
 	int tatumLength = time.getSamplesPerTatum();
@@ -78,7 +78,7 @@ public class Manifester {
 		    segs[segCounter++] = new Segment(new Note(art, pitches.get(seq[tatumCounter]), w), span);
 		}
 		else {
-		    System.out.println("Segment " + segCounter + " has span longer than note duration of " + art.duration);
+		    System.out.println("Segment " + segCounter + " has span " + span + " longer than note duration of " + art.duration);
 		    segs[segCounter++] = new Segment(new Note(art, pitches.get(seq[tatumCounter]), w), art.duration);
 		    System.out.println("Adding segment of silence length " + (span - art.duration));
 		    segs[segCounter++] = new Segment(null, span - art.duration); // silence
@@ -94,7 +94,7 @@ public class Manifester {
 	return finalSegs;
     }
     public void testUsing(SourceDataLine out) {
-	int[] seq = new int[] {69, 71, 73, 74, 76, 78, 80, 81, 83, 85};
+	int[] seq = new int[] {31, -1, -1, -1, 35, 38, 41, -1, -1, 43, -1, 41};
 	//int[] seq = new int[] {69};
 	Segment[] segs = seqToSegs(seq); 
 	System.out.println("Segments " + segs.length);
@@ -116,15 +116,19 @@ public class Manifester {
 		    //System.out.println("Putting short " + counter + " from seg " + i + " at position " + full.position());
 		    full.putShort(audio[counter]);
 		}
-		//System.out.println(" --- Put " + counter + " shorts, ByteBuffer capacity left " + full.remaining());
+		System.out.println(" --- Put " + counter + " shorts, ByteBuffer capacity left " + full.remaining());
 	    }
 	    else {
 		short[] audio = new short[segs[i].duration];
-		for (int counter = 0; counter < segs[i].duration; counter++) {
-		    //System.out.println("Putting short " + counter + " from seg " + i);
-		    full.putShort((short)0);
+		int counter = 0;
+		for (; counter < segs[i].duration; counter++) {
+		    System.out.println("Putting silent short " + counter + " from seg " + i);
+		    full.putShort((short) 0);
+		    //full.putShort((short) 0);
 		    counter++;
 		}
+		System.out.println(" --- Put " + counter + " shorts of silence, ByteBuffer capacity left " + full.remaining());
+	    
 	    }
 	}
 	

@@ -44,7 +44,7 @@ public class Note {
 	}
 	// a tiny linear fadeout to mitigate clicking
 	int fadeLengthMillis = 20; // ms
-	int fadeLengthSamples = Calc.secsToSamples((double) fadeLengthMillis / 1000);
+	int fadeLengthSamples = Calc.secsToSamples((double) fadeLengthMillis) / 1000;
 	System.out.println(Calc.secsToSamples(0.2));
 	if (played.length > (fadeLengthSamples * 2)) {
 	    System.out.println("FADE " + fadeLengthSamples);

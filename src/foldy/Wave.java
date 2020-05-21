@@ -57,10 +57,9 @@ public class Wave {
 	// precision of int division thanks to scaling the sample position int by
 	// Short.MAX_VALUE
 	// still plenty of obvious caching to do
-	double result;
+	int result;
 	if (form == Form.SINE) {
-	    double revsBySamples = 2.0 * Math.PI * multiple / size; // only calc when needed, obvs!
-	    result = (Short.MAX_VALUE * powerSeriesSine(revsBySamples * sample));
+	    result = (SineTableBhaskara.get(sample * Short.MAX_VALUE * multiple / size));
 	    System.out.println("Wave val " + result + " at sample " + sample);
 	}
 	else if (form == Form.SAW) {
@@ -82,12 +81,13 @@ public class Wave {
 	    result = unMultiplied *(Short.MAX_VALUE / (quarter + 1)); // fix to avoid overflow from rounding error   
 	}
 	else {
-	    double revsBySamples = 2.0 * Math.PI * multiple / size; // only calc when needed, obvs!
-	    result = (Short.MAX_VALUE * Math.sin(revsBySamples));
+	    result = (SineTableBhaskara.get(sample * Short.MAX_VALUE * multiple / size));
+	    System.out.println("Wave val " + result + " at sample " + sample);
 	}
 	//return (int) result;
 	return threshold.inverseBy((int) result);
     } 
+    /*
     private double powerSeriesSine(double arg) {
 	arg = (arg % (Math.PI * 2));
 	boolean flip = false;
@@ -168,5 +168,6 @@ public class Wave {
 	}
 	return (short) (result);
     } 
+*/
 
 }
