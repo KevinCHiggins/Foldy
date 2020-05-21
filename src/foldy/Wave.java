@@ -12,6 +12,7 @@ package foldy;
  * @author Kevin Higgins
  */
 public class Wave {
+    final static int TERMS_AMOUNT = 7;
     Fraction threshold; // fraction of maximum amplitude at which wave is folded
     public enum Form {
 	SINE, SQUARE, TRIANGLE, SAW
@@ -59,7 +60,7 @@ public class Wave {
 	double result;
 	if (form == Form.SINE) {
 	    double revsBySamples = 2.0 * Math.PI * multiple / size; // only calc when needed, obvs!
-	    result = (Short.MAX_VALUE * bhaskara(revsBySamples * sample));
+	    result = (Short.MAX_VALUE * powerSeriesSine(revsBySamples * sample));
 	    System.out.println("Wave val " + result + " at sample " + sample);
 	}
 	else if (form == Form.SAW) {
@@ -87,6 +88,34 @@ public class Wave {
 	//return (int) result;
 	return threshold.inverseBy((int) result);
     } 
+    private double powerSeriesSine(double arg) {
+	arg = (arg % (Math.PI * 2));
+	boolean flip = false;
+	if (arg > Math.PI) {
+	    arg -= Math.PI;
+	    flip = true;
+	}
+	int signOfTerm = 1;
+	int n = 1;
+	double result = 0;
+	while (n <= TERMS_AMOUNT) {
+	    result += signOfTerm * (Math.pow(arg,(2* n) - 1)) / factorial(2*n-1);
+	    n++;
+	    signOfTerm = signOfTerm * -1;
+	}
+	if (flip) result = 0 - result;
+	return result;
+    }
+    private int factorial(int n) {
+	if (n == 1) return 1;
+	int result = n;
+	n--;
+	do  {
+	    result = result * n;
+	    n--;
+	} while (n > 0);
+	return result;
+    }
     private double bhaskara(double arg) {
 	double result;
 	arg = (arg % (2 * Math.PI));
