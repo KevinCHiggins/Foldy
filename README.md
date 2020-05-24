@@ -13,6 +13,6 @@ Kevin Higgins, 24/05/20
 
 Examples:
 
-[Blues](https://raw.githubusercontent.com/KevinCHiggins/Foldy/master/Blues.wav)
+[Blues](https://raw.githubusercontent.com/KevinCHiggins/Foldy/master/Blues.mp3)
 
-[Subharmonics and harmonics](https://raw.githubusercontent.com/KevinCHiggins/Foldy/master/Harmonics.wav)
+[Subharmonics and harmonics](https://raw.githubusercontent.com/KevinCHiggins/Foldy/master/Harmonics.mp3)
