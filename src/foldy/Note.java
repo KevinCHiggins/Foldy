@@ -17,30 +17,43 @@ public class Note {
     Articulation art;
     short[] chunkLevels; // envelope point for the START of every chunk including any partial final chunk
     
-    // how many samples there are of any final, partial chunk... this way Notes have sample accurate duration
-    int remainderInSamples; 
-    
     public short[] playShortBy(int shortfall) {
 	int durationDesired = getDuration() - shortfall;
 	return playFor(durationDesired);
     }
     public short[] playFor(int duration) {
-	System.out.println("Test value from Note " + chunk.getSmp(0));
+	
 	// chunks count GIVEN THIS DURATION!! Different from fullChunksCount
 	int chunksCount = duration / chunk.getSize(); 
 	int remainderInSamples = duration % chunk.getSize();
 	short[] played = new short[duration];
 	int index = 0;
-	System.out.println("Chunk size " + chunk.getSize() + ", count " + chunksCount + ", env points " + chunkLevels.length);
+	int chunkSize = chunk.getSize();
+	System.out.println("Chunk size " + chunkSize + ", count " + chunksCount + ", env points " + chunkLevels.length);
+	int diff;
+	int level;
 	for (int i = 0; i < chunksCount; i++) {
-	    for(int j = 0; j < chunk.getSize(); j++) {
-		played[index] = (short)((chunk.getSmp(j) * chunkLevels[i]) / Short.MAX_VALUE);
-		index++;
+	    for(int j = 0; j < chunkSize; j++) {
+		
+		diff = chunkLevels[i + 1] - chunkLevels[i]; // overall difference between points
+		level = chunkLevels[i] + ((j * diff ) / chunkSize); // difference analysis
+
+		played[index] = (short)((chunk.getSmp(j) * level) / Short.MAX_VALUE);
+		
+		//System.out.println("level " + chunkLevels[i] + "chunk " + i + " offset " + j + " data inside note: " + played[index]);
 		//System.out.println("Index" + index);
+		index++;
 	    }
 	}
+	int endLength = chunkSize; // the length of the last chunk or partial chunk being played
+	// adjust if it's the actual leftover chunk of the Note
+	if (chunksCount == art.duration/chunkSize) endLength = (art.duration % chunkSize);
 	for (int j = 0; j < remainderInSamples; j++) {
-	    played[index] = (short)((chunk.getSmp(j) * chunkLevels[chunkLevels.length - 1]) / Short.MAX_VALUE);
+	    diff = 0 - chunkLevels[chunkLevels.length - 1];
+	    level = chunkLevels[chunkLevels.length - 1] + ((j * diff) / endLength);
+	    played[index] = (short)((chunk.getSmp(j) * level) / Short.MAX_VALUE);
+	    System.out.println("Lev at " + (chunkLevels.length - 1) + ": " + chunkLevels[chunkLevels.length - 1] + ", Remainder size + " + remainderInSamples+ " data at " + j + " : " + played[index]);
+	    index++;
 	}
 	// a tiny linear fadeout to mitigate clicking
 	int fadeLengthMillis = 20; // ms
@@ -69,18 +82,18 @@ public class Note {
     private void setChunkLevels(Articulation art) {
 	
 	int pointsCount = art.duration / chunk.getSize(); 
+	int fullChunks = pointsCount;
 	System.out.println("Setting chunk level points. Duration " + art.duration + " chunk size " + chunk.getSize());
-	if (remainderInSamples > 0) pointsCount += 1; // add a volume point for start of remainder
+	if (art.duration % chunk.getSize() >  0) pointsCount += 1; // add a volume point for start of remainder
 	chunkLevels = new short[pointsCount];
-	// gonna use Short.MAX_VALUE as my unit for proportion of note length
-	// to keep things int
-	// this variable will hold how many samples are still to come
-	// counting from the start of the current chunk
-	int samplesAhead;
+	System.out.println(pointsCount + " env points.");
+	System.out.println("fullchunks " + fullChunks + " max * size " + Short.MAX_VALUE * chunk.getSize() + " duration " + art.duration);
 	for (int i = 0; i < pointsCount; i++) {
-	    samplesAhead = (art.duration - (i * chunk.getSize()));
-	    chunkLevels[i] = (short)((samplesAhead * Short.MAX_VALUE) / art.duration);
+	    chunkLevels[i] = (short) (((long)(pointsCount - i) * Short.MAX_VALUE * chunk.getSize()) / art.duration);
+	    System.out.println("chunklevel " + chunkLevels[i]);
 	}
+	// due to rounding, the first value is often overflowed so reset it
+	chunkLevels[0] = Short.MAX_VALUE;
 	
     }
     public int getDuration() {

@@ -7,9 +7,8 @@
 package foldy;
 
 /**
- * This will return fractional representations of ET, QT, harmonic series, undertones and
- * Golden Ratio when I can figure out how I was generating pitches from it
- * in Synthedit. And prob some limit systems. Forget 19 and all that crap though.
+ * This will return fractional representations of harmonic series, undertones and
+ * Golden Ratio 
  * @author Kevin Higgins
  */
 public class RatioSeries {

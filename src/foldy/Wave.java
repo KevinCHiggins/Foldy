@@ -59,17 +59,17 @@ public class Wave {
 	// still plenty of obvious caching to do
 	int result;
 	if (form == Form.SINE) {
-	    result = (SineTableBhaskara.get(sample * Short.MAX_VALUE * multiple / size));
-	    System.out.println("Wave val " + result + " at sample " + sample);
+	    result = (SineTableTaylor.get(sample * Short.MAX_VALUE * multiple / size));
+	    //System.out.println("Wave val " + result + " at sample " + sample);
 	}
 	else if (form == Form.SAW) {
 	    result = ((sample * Short.MAX_VALUE * 2 * multiple) / size);
-	    System.out.println("Wave val " + result + " at sample " + sample);
+	    //System.out.println("Wave val " + result + " at sample " + sample);
 	}
 	else if (form == Form.SQUARE) {
 	    result = ((sample * Short.MAX_VALUE * multiple * 2) / size) > (Short.MAX_VALUE / 2)? 1 : -1;
 	    result = result * Short.MAX_VALUE;
-	    System.out.println("Wave val " + result + " at sample " + sample);
+	    //System.out.println("Wave val " + result + " at sample " + sample);
 	}
 	else if (form == Form.TRIANGLE) {
 	    // x = m - abs(i % (2*m) - m
@@ -81,8 +81,8 @@ public class Wave {
 	    result = unMultiplied *(Short.MAX_VALUE / (quarter + 1)); // fix to avoid overflow from rounding error   
 	}
 	else {
-	    result = (SineTableBhaskara.get(sample * Short.MAX_VALUE * multiple / size));
-	    System.out.println("Wave val " + result + " at sample " + sample);
+	    result = (SineTableTaylor.get(sample * Short.MAX_VALUE * multiple / size));
+	    //System.out.println("Wave val " + result + " at sample " + sample);
 	}
 	//return (int) result;
 	return threshold.inverseBy((int) result);

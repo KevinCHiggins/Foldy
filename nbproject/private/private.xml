@@ -3,19 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Pitch.java</file>
-            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Fraction.java</file>
-            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/TempoApproximator.java</file>
-            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/OmniPlotWindow.java</file>
-            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/RootFinder.java</file>
-            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/RatioSeries.java</file>
             <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Note.java</file>
-            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Chunk.java</file>
             <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Foldy.java</file>
             <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Manifester.java</file>
-            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/SineTableBhaskara.java</file>
-            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Wave.java</file>
-            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Gamut.java</file>
+            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/TempoApproximator.java</file>
+            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/OmniPlotWindow.java</file>
         </group>
     </open-files>
 </project-private>

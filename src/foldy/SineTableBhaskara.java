@@ -10,7 +10,7 @@ package foldy;
  *
  * @author Kevin Higgins
  */
-public class SineTableBhaskara {
+public class SineTableBhaskara {/*
     public static void main(String[] args) {
 	//OmniPlotWindow plot = new OmniPlotWindow(sine, Short.MAX_VALUE, 0 - Short.MAX_VALUE, 40);
     }
@@ -36,4 +36,5 @@ public class SineTableBhaskara {
 	offset = offset % Short.MAX_VALUE;
 	return sine[offset];
     }
+*/
 }
