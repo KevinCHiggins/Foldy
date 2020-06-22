@@ -1,5 +1,5 @@
 # Foldy
-Wavefolding Synth-Sequencer using Java Sound API
+Wavefolding Synth-Sequencer using Java Sound API, in fixed-point arithmetic
 
 Wrapping this project up today with a couple of example sounds and this readme. The design choices - particularly the use of an unchangingly repeated Chunk containing a small whole number of cycles of the fundamental frequency, as the basic subunit of a note, are too restrictive to make further development worthwhile.
 
@@ -13,6 +13,6 @@ Kevin Higgins, 24/05/20
 
 Examples:
 
-[Blues](https://raw.githubusercontent.com/KevinCHiggins/Foldy/master/Blues.wav)
+[Blues](https://raw.githubusercontent.com/KevinCHiggins/Foldy/master/Blues.mp3)
 
-[Subharmonics and harmonics](https://raw.githubusercontent.com/KevinCHiggins/Foldy/master/Harmonics.wav)
+[Subharmonics and harmonics](https://raw.githubusercontent.com/KevinCHiggins/Foldy/master/Harmonics.mp3)
