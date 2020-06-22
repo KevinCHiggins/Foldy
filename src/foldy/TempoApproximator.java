@@ -15,7 +15,7 @@ public final class TempoApproximator {
     final private int DEFAULT_DIV = 4;
     final private int DEFAULT_TIME = 4;
     final private int DEFAULT_BPM = 120;
-    int targBPM = 120;
+    float targBPM = 120;
     double actualBPM;
     private int samplesPerBeat;
     private int samplesPerTatum;
@@ -24,7 +24,7 @@ public final class TempoApproximator {
     public TempoApproximator() {
 	calcSamplesPerTatum();
     }
-    public TempoApproximator(int targBPM) {
+    public TempoApproximator(float targBPM) {
 	this.targBPM = targBPM;
 	calcSamplesPerTatum();
     }
@@ -49,7 +49,7 @@ public final class TempoApproximator {
     }
     private void calcSamplesPerTatum() {
 	int minuteInSamples = Calc.secsToSamples(60);
-	samplesPerTatum = (minuteInSamples / targBPM / subdivision);
+	samplesPerTatum = (int) (minuteInSamples / targBPM / subdivision);
 	samplesPerBeat = samplesPerTatum * subdivision;
 	actualBPM = minuteInSamples / (double)samplesPerBeat;
 	System.out.println("Target: " + targBPM + ", actual: " + actualBPM + ", per tatum: " + samplesPerTatum + ", per beat: " + samplesPerBeat );
