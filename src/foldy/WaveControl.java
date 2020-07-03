@@ -6,28 +6,40 @@
 
 package foldy;
 
+import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField;
+import javax.swing.JPanel;
+
 /**
- * Wave functions
- * I WANT TO USE BHASKARA THE FIRST'S TASTY APPROXIMATION IN HERE
+ * WaveControl functions
+ I WANT TO USE BHASKARA THE FIRST'S TASTY APPROXIMATION IN HERE
  * @author Kevin Higgins
  */
-public class Wave {
+public class WaveControl extends JPanel {
+    OmniPlot wavePlot;
+    JFormattedTextField thresholdNumControl = new JFormattedTextField(); // keeping it simple, I'll store the two parts
+    JFormattedTextField thresholdDenomControl = new JFormattedTextField(); // of a Fraction in these standard controls
+						// which'll get made into a Fraction when folding happens
+    JComboBox formControl = new JComboBox(Form.values());
     final static int TERMS_AMOUNT = 7;
-    Fraction threshold; // fraction of maximum amplitude at which wave is folded
+    //Fraction threshold; // fraction of maximum amplitude at which wave is folded
     public enum Form {
 	SINE, SQUARE, TRIANGLE, SAW
     }
-    public final Form form;
-    public Wave(Form form) {
-	threshold = new Fraction(1, 1); // no folding can happen anyway
-	this.form = form;
+    //public final Form form;
+    public WaveControl(Form form) {
+	thresholdNumControl.setValue(1); // no folding can happen anyway
+	thresholdDenomControl.setValue(1);
+	formControl.setSelectedItem(form);
     }
-    public Wave(Form form, Fraction threshold) {
-	this.threshold = threshold; // no folding can happen anyway
-	this.form = form;
+    public WaveControl(Form form, Fraction threshold) {
+	thresholdNumControl.setValue(threshold.denominator); // inelegant, break up the Fraction into UI
+	thresholdDenomControl.setValue(threshold.numerator); // components (will be remade later)
+	formControl.setSelectedItem(form);
     }
     public short functionFoldedAt(int sample, int size, int multiple, Fraction threshold) {
-	this.threshold = threshold;
+	thresholdNumControl.setValue(threshold.denominator); // inelegant, break up the Fraction into UI
+	thresholdDenomControl.setValue(threshold.numerator); // components (will be remade later)
 	return functionFolded(sample, size, multiple);
     }
     // assumes use of normalisedFunction has multiplied amplitude by the 
@@ -58,20 +70,20 @@ public class Wave {
 	// Short.MAX_VALUE
 	// still plenty of obvious caching to do
 	int result;
-	if (form == Form.SINE) {
+	if (formControl.getSelectedItem() == Form.SINE) {
 	    result = (SineTableTaylor.get(sample * Short.MAX_VALUE * multiple / size));
-	    //System.out.println("Wave val " + result + " at sample " + sample);
+	    //System.out.println("WaveControl val " + result + " at sample " + sample);
 	}
-	else if (form == Form.SAW) {
+	else if (formControl.getSelectedItem() == Form.SAW) {
 	    result = ((sample * Short.MAX_VALUE * 2 * multiple) / size);
-	    //System.out.println("Wave val " + result + " at sample " + sample);
+	    //System.out.println("WaveControl val " + result + " at sample " + sample);
 	}
-	else if (form == Form.SQUARE) {
+	else if (formControl.getSelectedItem() == Form.SQUARE) {
 	    result = ((sample * Short.MAX_VALUE * multiple * 2) / size) > (Short.MAX_VALUE / 2)? 1 : -1;
 	    result = result * Short.MAX_VALUE;
-	    //System.out.println("Wave val " + result + " at sample " + sample);
+	    //System.out.println("WaveControl val " + result + " at sample " + sample);
 	}
-	else if (form == Form.TRIANGLE) {
+	else if (formControl.getSelectedItem() == Form.TRIANGLE) {
 	    // x = m - abs(i % (2*m) - m
 	    int period = size / multiple;
 	    int half = period / 2;
@@ -82,10 +94,13 @@ public class Wave {
 	}
 	else {
 	    result = (SineTableTaylor.get(sample * Short.MAX_VALUE * multiple / size));
-	    //System.out.println("Wave val " + result + " at sample " + sample);
+	    //System.out.println("WaveControl val " + result + " at sample " + sample);
 	}
-	//return (int) result;
-	return threshold.inverseBy((int) result);
+	// ugly pile of conversions, yes
+	// get values of threshold denominator and numerator
+	// as Objects from UI controls, turn them to Strings then Ints, then
+	// build a Fraction from them...
+	return new Fraction(Integer.parseInt(thresholdNumControl.getValue().toString()),Integer.parseInt(thresholdNumControl.getValue().toString())).inverseBy((int) result);
     } 
     /*
     private double powerSeriesSine(double arg) {
@@ -142,16 +157,16 @@ public class Wave {
 	    // (16x(pi - x))/5(pi^2) - rx(pi -x)
 	    
 	    result = (short) (Short.MAX_VALUE * bhaskara(revsBySamples * sample));
-	    System.out.println("Wave val for sine " + result + " at sample " + sample);
+	    System.out.println("WaveControl val for sine " + result + " at sample " + sample);
 	}
 	else if (form == Form.SAW) {
 	    result = (short) ((sample * Short.MAX_VALUE * 2 * multiple) / size);
-	    System.out.println("Wave val for saw " + result + " at sample " + sample);
+	    System.out.println("WaveControl val for saw " + result + " at sample " + sample);
 	}
 	else if (form == Form.SQUARE) {
 	    result = ((sample * Short.MAX_VALUE * multiple * 2) / size) > (Short.MAX_VALUE / 2)? 1 : -1;
 	    result = result * Short.MAX_VALUE;
-	    System.out.println("Wave val for square " + result + " at sample " + sample);
+	    System.out.println("WaveControl val for square " + result + " at sample " + sample);
 	}
 	else if (form == Form.TRIANGLE) {
 	    // x = m - abs(i % (2*m) - m

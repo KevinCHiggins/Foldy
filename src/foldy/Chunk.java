@@ -16,7 +16,7 @@ public class Chunk {
     int size; // many samples per chunk - always should be more than 220
     int multiple; // how many cycles of the wave per chunk - a small whole number
     
-    public Chunk(Pitch targetFreq, Wave wave) {
+    public Chunk(Pitch targetFreq, WaveControl wave) {
 	size(targetFreq);
 	make(wave);
     }
@@ -32,8 +32,8 @@ public class Chunk {
 	chunk = new short[size];
     }
     
-    private void make(Wave wave) {
-	//if (wave.form == Wave.Form.SINE) {
+    private void make(WaveControl wave) {
+	//if (wave.form == WaveControl.Form.SINE) {
 	    
 	    
 	    for (int i = 0; i < size; i++) {

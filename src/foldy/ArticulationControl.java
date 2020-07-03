@@ -6,18 +6,20 @@
 
 package foldy;
 
+import javax.swing.JPanel;
+
 /**
  *
  * @author Kevin Higgins
  */
-public class Articulation {
+public class ArticulationControl extends JPanel {
     public int duration;
     public enum Env {
 	LINEAR_FALLOFF
     }
     public Env env;
 
-    public Articulation(int duration, Env env) {
+    public ArticulationControl(int duration, Env env) {
 	this.env = env;
 	this.duration = duration;
     }

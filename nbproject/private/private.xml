@@ -3,12 +3,16 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Note.java</file>
+            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/NoteControl.java</file>
             <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Pitch.java</file>
             <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Foldy.java</file>
-            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Manifester.java</file>
-            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/TempoApproximator.java</file>
+            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/ArticulationControl.java</file>
+            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/TimeControl.java</file>
+            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/OmniPlot.java</file>
+            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/WaveControl.java</file>
+            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/RawAudioWarehouser.java</file>
             <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/OmniPlotWindow.java</file>
+            <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/ManifesterControl.java</file>
             <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/RatioSeries.java</file>
             <file>file:/C:/Users/Kevin/Documents/NetBeansProjects/Foldy/src/foldy/Gamut.java</file>
         </group>

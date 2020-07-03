@@ -6,15 +6,19 @@
 
 package foldy;
 
+import javax.swing.JPanel;
+
 /**
  *
  * @author Kevin Higgins
  */
-public class Note {
+public class NoteControl extends JPanel {
+    // this panel will have to contain TimeControl and WaveControl,
+    // but I'm not sure yet
     
     int chunkMultiple; // how many times the waveform will cycle in the chunk
     Chunk chunk;
-    Articulation art;
+    ArticulationControl art;
     short[] chunkLevels; // envelope point for the START of every chunk including any partial final chunk
     
     public short[] playShortBy(int shortfall) {
@@ -46,7 +50,7 @@ public class Note {
 	    }
 	}
 	int endLength = chunkSize; // the length of the last chunk or partial chunk being played
-	// adjust if it's the actual leftover chunk of the Note
+	// adjust if it's the actual leftover chunk of the NoteControl
 	if (chunksCount == art.duration/chunkSize) endLength = (art.duration % chunkSize);
 	for (int j = 0; j < remainderInSamples; j++) {
 	    diff = 0 - chunkLevels[chunkLevels.length - 1];
@@ -71,7 +75,7 @@ public class Note {
 	else System.out.println("TOO SHORT");
 	return played;
     }
-    public Note(Articulation art, Pitch pitch, Wave wave) {
+    public NoteControl(ArticulationControl art, Pitch pitch, WaveControl wave) {
 	chunk = new Chunk(pitch, wave);
 	
 	setChunkLevels(art);
@@ -79,7 +83,7 @@ public class Note {
     }
 
     
-    private void setChunkLevels(Articulation art) {
+    private void setChunkLevels(ArticulationControl art) {
 	
 	int pointsCount = art.duration / chunk.getSize(); 
 	int fullChunks = pointsCount;
