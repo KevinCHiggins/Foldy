@@ -35,7 +35,7 @@ public class Foldy {
 	Calc convert = new Calc(setup);
 	SourceDataLine outputJack;
 	AudioFormat format = setup.getFormat();
-	ManifesterControl play = new ManifesterControl();
+	Manifester play = new Manifester();
 	String lineInfoReport = "";
 	try {
 	    outputJack = setup.getOutputJack();

@@ -15,7 +15,6 @@ import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import javax.sound.sampled.SourceDataLine;
-import javax.swing.JPanel;
 
 /**
  * The engine of Foldy - uses attacks and rests from a sequence to create an
@@ -26,29 +25,29 @@ import javax.swing.JPanel;
  * this info is manifested.
  * @author Kevin Higgins
  */
-public class ManifesterControl extends JPanel {
+public class Manifester {
     final int BLOCK_SIZE_BYTES = 2048;
     final boolean LOOPED = false;
     SourceDataLine output;
     private class Segment {
-	NoteControl n;
+	Note n;
 	int duration;
-	public Segment(NoteControl n, int duration) {
+	public Segment(Note n, int duration) {
 	    this.n = n;
 	    this.duration = duration;
 	}
     }
     // turns a sequence of note attacks and rests into Segments consisting of
-    // either a NoteControl or a null signifying silence) and the duration it should be played
+    // either a Note or a null signifying silence) and the duration it should be played
     public Segment[] seqToSegs(int[] seq, String pitchLaw) {
 	Gamut pitches;
 	if (pitchLaw.equalsIgnoreCase("ET")) { pitches = new Gamut(); }
 	else if (pitchLaw.equalsIgnoreCase("Harmonics")) { pitches = Gamut.getHarmonicGamut(56); }
 	else { pitches = new Gamut(); }
-	TimeControl time = new TimeControl(66, 3);
+	TempoApproximator time = new TempoApproximator(66, 3);
 	Segment[] segs = new Segment[seq.length * 2]; // worst-case is every note falls short of next tatum
-	ArticulationControl art = new ArticulationControl(66000, ArticulationControl.Env.LINEAR_FALLOFF);
-	WaveControl w = new WaveControl(WaveControl.Form.SINE);
+	Articulation art = new Articulation(66000, Articulation.Env.LINEAR_FALLOFF);
+	Wave w = new Wave(Wave.Form.SINE);
 	int tatumCounter = 0; 
 	int segCounter = 0;
 	int tatumLength = time.getSamplesPerTatum();
@@ -71,7 +70,7 @@ public class ManifesterControl extends JPanel {
 	    } // special case, there are no more notes left and we want the last note to ring out
 	    else if (!LOOPED & searchForNext == seq.length) {
 		System.out.println("Trying to ring out");
-		segs[segCounter++] = new Segment(new NoteControl(art, pitches.get(seq[tatumCounter]), w), art.duration);
+		segs[segCounter++] = new Segment(new Note(art, pitches.get(seq[tatumCounter]), w), art.duration);
 	    }
 	    else { // if not, we're in the typical case where we want to lay
 		// down the note attacked at position tatumCounter;
@@ -79,11 +78,11 @@ public class ManifesterControl extends JPanel {
 		// or fill it with all of the current note and a silence
 		if (art.duration >= span) {
 		    System.out.println("Segment " + segCounter + " has span shorter than note duration of " + art.duration);
-		    segs[segCounter++] = new Segment(new NoteControl(art, pitches.get(seq[tatumCounter]), w), span);
+		    segs[segCounter++] = new Segment(new Note(art, pitches.get(seq[tatumCounter]), w), span);
 		}
 		else {
 		    System.out.println("Segment " + segCounter + " has span " + span + " longer than note duration of " + art.duration);
-		    segs[segCounter++] = new Segment(new NoteControl(art, pitches.get(seq[tatumCounter]), w), art.duration);
+		    segs[segCounter++] = new Segment(new Note(art, pitches.get(seq[tatumCounter]), w), art.duration);
 		    System.out.println("Adding segment of silence length " + (span - art.duration));
 		    segs[segCounter++] = new Segment(null, span - art.duration); // silence
 		}
