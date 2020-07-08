@@ -6,6 +6,7 @@
 
 package foldy;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -53,16 +54,16 @@ public class Control extends JFrame implements WindowListener, ChangeListener, A
     JButton play = new JButton("Play");
     JRadioButton save = new JRadioButton();
     JLabel saveLabel = new JLabel("Save to file");
-    JSpinner tempo = new JSpinner(new SpinnerNumberModel(100, 20, 400, 1));
+    JSpinner tempo = new JSpinner(new SpinnerNumberModel(90, 20, 400, 1));
     JLabel tempoLabel = new JLabel("Tempo");
     JSpinner subdivision = new JSpinner(new SpinnerNumberModel(4, 1, 12, 1));
     JLabel subLabel = new JLabel("Subdivision");
     JLabel seqLabel = new JLabel("Sequence");
-    SequenceControl sequence = new SequenceControl("69, 67, 64, 69, 67, 64, 67, 0, 64, 68, 0, 69");
+    SequenceControl sequence = new SequenceControl("65, 65, 63, 65, -1, 60, -1, 60, 65, 70, 69, 65");
     JPanel seqPanel = new JPanel();
     JComboBox envelope = new JComboBox(new DefaultComboBoxModel(Articulation.Env.values()));
     JLabel envLabel = new JLabel("Envelope");
-    JSpinner length = new JSpinner(new SpinnerNumberModel(44100, 100, 60000, 100));
+    JSpinner length = new JSpinner(new SpinnerNumberModel(4000, 100, 60000, 100));
     JLabel lengthLabel = new JLabel("Length");
     JComboBox wave = new JComboBox(new DefaultComboBoxModel(Wave.Form.values()));
     JLabel waveLabel = new JLabel("Waveform");
@@ -77,8 +78,11 @@ public class Control extends JFrame implements WindowListener, ChangeListener, A
     SourceDataLine outputJack;
     public Control(SourceDataLine outputJack) {
 	System.out.println("Insets on sequence JTextArea: " + sequence.getInsets());
-	seqPanel.add(sequence);
+	//seqPanel.setPreferredSize(sequence.getPreferredSize());
+	sequence.setBorder(BorderFactory.createMatteBorder(0, 0, 20, 0, Color.WHITE));
 	seqPanel.setBorder(BorderFactory.createEtchedBorder());
+	seqPanel.add(sequence);
+	
 	this.setTitle("Foldy");
 	this.outputJack = outputJack;
 	this.getContentPane().setLayout(new GridBagLayout());
@@ -100,7 +104,8 @@ public class Control extends JFrame implements WindowListener, ChangeListener, A
     }
     private GridBagConstraints setupCTop(int gridx, int gridy, int gridwidth, int gridheight) {
 	GridBagConstraints gbc = setupC(gridx, gridy, gridwidth, gridheight);
-	gbc.anchor = GridBagConstraints.PAGE_START;
+	gbc.insets = new Insets(0, 0, 0, 0);
+	gbc.anchor = GridBagConstraints.CENTER;
 	return gbc;
     }
     private void initComponents() {

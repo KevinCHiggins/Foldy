@@ -20,7 +20,7 @@ import javax.swing.JTextField;
 public class SequenceControl extends JTextArea {
     
     public SequenceControl(String s) {
-	super(s, 4, 20);
+	super(s, 2, 20);
 	this.setLineWrap(true);
 	this.setWrapStyleWord(true);
 	//this.setPreferredSize(new Dimension(20, 20));
