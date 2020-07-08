@@ -7,7 +7,7 @@
 package foldy;
 
 /**
- *
+ * Note - calls OmniPlot
  * @author Kevin Higgins
  */
 public class Chunk {
@@ -28,7 +28,7 @@ public class Chunk {
 	    multiple++;
 	    size = (Calc.sampleRate * multiple * pitch.getDenominator() / pitch.getNumerator());
 	}
-	System.out.println("In chunk, mult " + multiple + ", size " + size);
+	System.out.println("In chunk, mult " + multiple + ", size " + size + " for pitch " + pitch.getNumerator() + "/" + pitch.getDenominator());
 	chunk = new short[size];
     }
     
@@ -40,7 +40,7 @@ public class Chunk {
 		chunk[i] = wave.functionFolded(i, size, multiple);
 		
 	    }
-	    new OmniPlotWindow(chunk, Short.MAX_VALUE, 0 - Short.MAX_VALUE, 5);
+	    //new OmniPlotWindow(chunk, Short.MAX_VALUE, 0 - Short.MAX_VALUE, 5);
 	//}
     }
     

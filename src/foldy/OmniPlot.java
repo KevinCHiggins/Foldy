@@ -35,7 +35,14 @@ public class OmniPlot extends JPanel {
 	//setBackground(Color.black);
     }
     public Dimension getPreferredSize() {
+	System.out.println("Dimension for Omniplot sought of " + plotWidth +", " + PLOT_HEIGHT);
         return new Dimension(plotWidth, PLOT_HEIGHT);
+	
+    }
+    public Dimension getMinimumSize() {
+	System.out.println("Min dimension for Omniplot sought of " + plotWidth +", " + PLOT_HEIGHT);
+        return new Dimension(plotWidth, PLOT_HEIGHT);
+	
     }
 	public void paintComponent(Graphics g) {
 	    super.paintComponent(g);

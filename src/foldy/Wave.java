@@ -8,7 +8,7 @@ package foldy;
 
 /**
  * Wave functions
- * I WANT TO USE BHASKARA THE FIRST'S TASTY APPROXIMATION IN HERE
+ * 
  * @author Kevin Higgins
  */
 public class Wave {
@@ -19,11 +19,11 @@ public class Wave {
     }
     public final Form form;
     public Wave(Form form) {
-	threshold = new Fraction(1, 1); // no folding can happen anyway
+	threshold = new Fraction(1, 1); 
 	this.form = form;
     }
     public Wave(Form form, Fraction threshold) {
-	this.threshold = threshold; // no folding can happen anyway
+	this.threshold = threshold; 
 	this.form = form;
     }
     public short functionFoldedAt(int sample, int size, int multiple, Fraction threshold) {
@@ -62,12 +62,16 @@ public class Wave {
 	    result = (SineTableTaylor.get(sample * Short.MAX_VALUE * multiple / size));
 	    //System.out.println("Wave val " + result + " at sample " + sample);
 	}
-	else if (form == Form.SAW) {
-	    result = ((sample * Short.MAX_VALUE * 2 * multiple) / size);
+	else if (form == Form.SAW) {	    
+	    int period = size / multiple;
+	    int half = period / 2;
+	    int quarter = half / 2;
+	    int offset = sample % period;
+	    result = ((Short.MAX_VALUE * 2 * offset) / period) - Short.MAX_VALUE;
 	    //System.out.println("Wave val " + result + " at sample " + sample);
 	}
 	else if (form == Form.SQUARE) {
-	    result = ((sample * Short.MAX_VALUE * multiple * 2) / size) > (Short.MAX_VALUE / 2)? 1 : -1;
+	    result = ((sample * Short.MAX_VALUE * multiple * 2) / size) > (Short.MAX_VALUE)? 1 : -1;
 	    result = result * Short.MAX_VALUE;
 	    //System.out.println("Wave val " + result + " at sample " + sample);
 	}

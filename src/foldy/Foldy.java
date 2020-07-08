@@ -13,6 +13,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
+import javax.swing.JFrame;
 
 /**
  *
@@ -31,6 +32,7 @@ public class Foldy {
 	    //System.out.println(q.getNextY());
 	}
 	*/
+
 	SoundSetup setup = new SoundSetup();
 	Calc convert = new Calc(setup);
 	SourceDataLine outputJack;
@@ -43,21 +45,19 @@ public class Foldy {
 	    outputJack.open(setup.getFormat(), setup.getBufferSize());
 	    System.out.println(setup.reportAvailableMixers());
 	    System.out.println("Opened " + lineInfoReport + ", using " + setup.getFormat());
-	    play.testUsing(outputJack);
-	    while (outputJack.available() < outputJack.getBufferSize()) {
-	    System.out.println("Waiting for buffer to empty, currently " + outputJack.available());
-		Thread.sleep(50);
-	    }
-	    System.out.println("Buffer empty, at " + outputJack.available() + " but still waiting 25ms more.");
-	    Thread.sleep(25);
-	    System.out.println("Closing jack.");
-	    outputJack.close();
+	    Control gui = new Control(outputJack);
+	
+	    java.awt.EventQueue.invokeLater(new Runnable() {
+		public void run() {
+		    gui.setVisible(true);
+		}
+	    });
 	}
 	catch (LineUnavailableException ex) {	    
 	    System.out.println("Despite previous check, no line available");
 	    System.exit(1);
 	}
-	catch (InterruptedException ex) {}
+	
 	
     
 

@@ -28,7 +28,7 @@ public class SineTableTaylor {
 	// off-by-one line which otherwise overwrites the last value at z = 1
 	// with 0. This way the wrong value gets overwritten and no need for an if.
 	while (x > 0) { 
-	    // lifted with much gratitude from https://www.coranac.com/2009/07/sines/
+	    // lifted with gratitude from https://www.coranac.com/2009/07/sines/
 	    result = (short) (x * ( (3<<p) - (x*x>>r) ) >> s);
 	    
 	    // instead of his cool reflection technique using a truth table, I keep it newb
@@ -38,7 +38,7 @@ public class SineTableTaylor {
 	    sine[half - x] = (result);
 	    x--;
 	}
-	OmniPlotWindow om = new OmniPlotWindow(sine, Short.MAX_VALUE, 0 - Short.MAX_VALUE, 5);
+	//OmniPlotWindow om = new OmniPlotWindow(sine, Short.MAX_VALUE, 0 - Short.MAX_VALUE, 5);
     }
     public static short get(int offset) {
 	offset = offset % Short.MAX_VALUE;

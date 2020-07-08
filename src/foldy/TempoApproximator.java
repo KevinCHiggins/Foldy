@@ -33,6 +33,11 @@ public final class TempoApproximator {
 	this.subdivision = subdivision;
 	calcSamplesPerTatum();
     }
+    public TempoApproximator(float targBPM, int subdivision) {
+	this.targBPM = targBPM;
+	this.subdivision = subdivision;
+	calcSamplesPerTatum();
+    }
     public void setBPM(int bpm) {
 	targBPM = bpm;
 	upToDate = false;

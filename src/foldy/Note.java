@@ -7,7 +7,9 @@
 package foldy;
 
 /**
- *
+ * Alas, to make my Chunks idea work, I treat both the second-last and the last
+ * (whole or partial) Chunk of the note separately to the rest. It's rough! It
+ * does however now work reliably inside the 100-44100 samples range of note lengths.
  * @author Kevin Higgins
  */
 public class Note {
@@ -23,16 +25,20 @@ public class Note {
     }
     public short[] playFor(int duration) {
 	
-	// chunks count GIVEN THIS DURATION!! Different from fullChunksCount
+	// chunks count GIVEN THIS DURATION!! Typically less than full chunks count
 	int chunksCount = duration / chunk.getSize(); 
 	int remainderInSamples = duration % chunk.getSize();
+
 	short[] played = new short[duration];
 	int index = 0;
 	int chunkSize = chunk.getSize();
 	System.out.println("Chunk size " + chunkSize + ", count " + chunksCount + ", env points " + chunkLevels.length);
 	int diff;
 	int level;
-	for (int i = 0; i < chunksCount; i++) {
+	// only go the second last chunk, as the last one may also be at the end of
+	// the array so needs a check in its difference calculation, so I 
+	// do it separately afterwards
+	for (int i = 0; i < chunksCount - 1; i++) {
 	    for(int j = 0; j < chunkSize; j++) {
 		
 		diff = chunkLevels[i + 1] - chunkLevels[i]; // overall difference between points
@@ -45,6 +51,26 @@ public class Note {
 		index++;
 	    }
 	}
+	// deal with the two possibilities: either this chunk is the very last
+	// in which case fade to zero, or it's not and difference analysis
+	// is performed between its level and the next chunk's level
+	int levelAfterEnd;
+	// if this chunk is the last with no remainder...
+	if (chunksCount % art.duration/chunk.getSize() == 0 && chunksCount == art.duration/chunk.getSize()) levelAfterEnd = 0;
+	else levelAfterEnd = chunkLevels[chunksCount + 1];
+	if (chunksCount > 0) {
+	    for(int j = 0; j < chunkSize; j++) {
+
+		diff = levelAfterEnd - chunkLevels[chunksCount - 1]; // overall difference between points
+		level = chunkLevels[chunksCount - 1] + ((j * diff ) / chunkSize); // difference analysis
+
+		played[index] = (short)((chunk.getSmp(j) * level) / Short.MAX_VALUE);
+
+		//System.out.println("level " + chunkLevels[i] + "chunk " + i + " offset " + j + " data inside note: " + played[index]);
+		//System.out.println("Index" + index);
+		index++;
+	    }
+	}
 	int endLength = chunkSize; // the length of the last chunk or partial chunk being played
 	// adjust if it's the actual leftover chunk of the Note
 	if (chunksCount == art.duration/chunkSize) endLength = (art.duration % chunkSize);
@@ -52,7 +78,7 @@ public class Note {
 	    diff = 0 - chunkLevels[chunkLevels.length - 1];
 	    level = chunkLevels[chunkLevels.length - 1] + ((j * diff) / endLength);
 	    played[index] = (short)((chunk.getSmp(j) * level) / Short.MAX_VALUE);
-	    System.out.println("Lev at " + (chunkLevels.length - 1) + ": " + chunkLevels[chunkLevels.length - 1] + ", Remainder size + " + remainderInSamples+ " data at " + j + " : " + played[index]);
+	    System.out.println("Lev at " + (chunkLevels.length - 1) + ": " + chunkLevels[chunkLevels.length - 1] + ", Remainder size " + remainderInSamples+ " data at " + j + " : " + played[index]);
 	    index++;
 	}
 	// a tiny linear fadeout to mitigate clicking

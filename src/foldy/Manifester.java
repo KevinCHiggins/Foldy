@@ -39,15 +39,15 @@ public class Manifester {
     }
     // turns a sequence of note attacks and rests into Segments consisting of
     // either a Note or a null signifying silence) and the duration it should be played
-    public Segment[] seqToSegs(int[] seq, String pitchLaw) {
+    public Segment[] seqToSegs(float targBpm, int sub, int[] seq, Articulation.Env env, int length, Wave.Form form, Fraction folding, String pitchLaw) {
 	Gamut pitches;
 	if (pitchLaw.equalsIgnoreCase("ET")) { pitches = new Gamut(); }
 	else if (pitchLaw.equalsIgnoreCase("Harmonics")) { pitches = Gamut.getHarmonicGamut(56); }
 	else { pitches = new Gamut(); }
-	TempoApproximator time = new TempoApproximator(66, 3);
+	TempoApproximator time = new TempoApproximator(targBpm, sub);
 	Segment[] segs = new Segment[seq.length * 2]; // worst-case is every note falls short of next tatum
-	Articulation art = new Articulation(66000, Articulation.Env.LINEAR_FALLOFF);
-	Wave w = new Wave(Wave.Form.SINE);
+	Articulation art = new Articulation(length, env);
+	Wave w = new Wave(form, folding);
 	int tatumCounter = 0; 
 	int segCounter = 0;
 	int tatumLength = time.getSamplesPerTatum();
@@ -96,6 +96,66 @@ public class Manifester {
 	}
 	return finalSegs;
     }
+    /*
+    // turns a sequence of note attacks and rests into Segments consisting of
+    // either a Note or a null signifying silence) and the duration it should be played
+    public Segment[] seqToSegs(int[] seq, String pitchLaw) {
+	Gamut pitches;
+	if (pitchLaw.equalsIgnoreCase("ET")) { pitches = new Gamut(); }
+	else if (pitchLaw.equalsIgnoreCase("Harmonics")) { pitches = Gamut.getHarmonicGamut(56); }
+	else { pitches = new Gamut(); }
+	TempoApproximator time = new TempoApproximator(66, 3);
+	Segment[] segs = new Segment[seq.length * 2]; // worst-case is every note falls short of next tatum
+	Articulation art = new Articulation(66000, Articulation.Env.LINEAR_FALLOFF);
+	Wave w = new Wave(Wave.Form.SINE, new Fraction(1, 1));
+	int tatumCounter = 0; 
+	int segCounter = 0;
+	int tatumLength = time.getSamplesPerTatum();
+	while (tatumCounter < seq.length) {
+	    // find next note
+	    int searchForNext = tatumCounter;
+	    do  {
+		searchForNext++;
+		if (searchForNext == seq.length) break;
+	    } while (seq[searchForNext] == -1);
+	    // calculate the span of time until that next note
+	    int span = (searchForNext - tatumCounter) * tatumLength;
+	    System.out.println("Filling timespan of " + span + " samples.");
+	    // if tatumCounter is 0 meaning we're at the sequence start,
+	    // and it starts with a rest
+	    if (tatumCounter == 0 && (seq[0] == -1)) {
+		// lay down a rest spanning the time till the next note
+		segs[segCounter++] = new Segment(null, span);
+		
+	    } // special case, there are no more notes left and we want the last note to ring out
+	    else if (!LOOPED & searchForNext == seq.length) {
+		System.out.println("Trying to ring out");
+		segs[segCounter++] = new Segment(new Note(art, pitches.get(seq[tatumCounter]), w), art.duration);
+	    }
+	    else { // if not, we're in the typical case where we want to lay
+		// down the note attacked at position tatumCounter;
+		// either fill the span with its duration's worth of current note
+		// or fill it with all of the current note and a silence
+		if (art.duration >= span) {
+		    System.out.println("Segment " + segCounter + " has span shorter than note duration of " + art.duration);
+		    segs[segCounter++] = new Segment(new Note(art, pitches.get(seq[tatumCounter]), w), span);
+		}
+		else {
+		    System.out.println("Segment " + segCounter + " has span " + span + " longer than note duration of " + art.duration);
+		    segs[segCounter++] = new Segment(new Note(art, pitches.get(seq[tatumCounter]), w), art.duration);
+		    System.out.println("Adding segment of silence length " + (span - art.duration));
+		    segs[segCounter++] = new Segment(null, span - art.duration); // silence
+		}
+	    }
+
+	    tatumCounter = searchForNext;
+	}
+	Segment[] finalSegs = new Segment[segCounter];
+	for (int i = 0; i < segCounter; i++) {
+	    finalSegs[i] = segs[i];
+	}
+	return finalSegs;
+    }*/
     public int[] testSeries() {
 	int[] all = new int[40];
 	for (int i = 0; i < 40; i++) {
@@ -103,11 +163,10 @@ public class Manifester {
 	}
 	return all;
     }
-    public void testUsing(SourceDataLine out) {
-	int[] seq = new int[] {31, -1, -1, -1, 35, 38, 41, -1, -1, 43, -1, 41, 29, -1, -1, -1, 33, 36, 39, -1, -1, 36, -1, 34, 36, -1, -1, -1, 40, 43, 41, -1, -1, 45, -1, 48, 48, -1, -1, 40, 41, 42, 43, -1, -1, 45, -1, 43, 36};
-	//int[] seq = new int[] {69};
-	//int[] seq = testSeries();
-	Segment[] segs = seqToSegs(seq, "ET"); 
+    // blues int[] seq = new int[] {31, -1, -1, -1, 35, 38, 41, -1, -1, 43, -1, 41, 29, -1, -1, -1, 33, 36, 39, -1, -1, 36, -1, 34, 36, -1, -1, -1, 40, 43, 41, -1, -1, 45, -1, 48, 48, -1, -1, 40, 41, 42, 43, -1, -1, 45, -1, 43, 36};
+	
+    public void bust(SourceDataLine out, boolean save, float targBpm, int subdivision, int[] seq, Articulation.Env env, int length, Wave.Form form, Fraction folding) {
+	Segment[] segs = seqToSegs(targBpm, subdivision, seq, env, length, form, folding, "ET");
 	System.out.println("Segments " + segs.length);
 	int fullLength = 0;
 	for (int i = 0; i < segs.length; i++) {
@@ -147,8 +206,10 @@ public class Manifester {
 	}
 	
 	byte[] bytes = full.array();
-	RawAudioWarehouser raw = new RawAudioWarehouser();
-	raw.save(bytes);
+	if (save) {
+	    RawAudioWarehouser raw = new RawAudioWarehouser();
+	    raw.save(bytes);
+	}
 	int counter = bytes.length;
 	out.start();
 	do {

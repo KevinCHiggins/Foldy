@@ -22,14 +22,14 @@ public class Gamut {
 	if (generator < 128 && generator > 0) {
 	    int counter = 1;
 	    // subharmonics
-	    for (int i = generator - 1; i > 0; i--) {
+	    for (int i = generator - 1; i > -1; i--) {
 		counter++;
 		g.chain[i] = new Pitch(generator);
 		g.chain[i].transpose(new Fraction(1, counter));	
 		System.out.println("Generated pitch " + g.chain[i].getFreq());
 	    }
 	    counter = 1;
-	    // subharmonics
+	    // harmonics
 	    for (int i = generator + 1; i < 128; i++) {
 		counter++;
 		g.chain[i] = new Pitch(generator);
