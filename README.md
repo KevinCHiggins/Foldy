@@ -14,7 +14,7 @@ Some caveats... waveforms other than sines don't transform nicely under folding;
 
 There is only a linear fall-off amplitude envelope at the moment.
 
-Looking back, I can see that this project was heavily inspired by two venerable and excellent PC music software releases: Hammerhead Rhythm Station and Drumsynth. From Hammerhead I got the idea of saving raw files to disk, and from Drumsynth the whole idea of non-realtime rendering.
+Looking back, I can see that this project was heavily inspired by two venerable and excellent PC music software releases: [Hammerhead Rhythm Station](http://threechords.com/hammerhead/introduction.shtml) and [Drumsynth](http://mda.smartelectronix.com/drumsynth.htm). From Hammerhead I got the idea of saving raw files to disk, and from Drumsynth the whole idea of non-realtime rendering.
 
 I'm happy enough with the code considering my experience level, apart from the Chunk system which was a poor idea that got heavily patched over. ```Note.java```, where all that happens, is ugly.
 
