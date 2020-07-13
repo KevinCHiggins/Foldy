@@ -18,7 +18,7 @@ Looking back, I can see that this project was heavily inspired by two venerable 
 
 I'm happy enough with the code considering my experience level, apart from the Chunk system which was a poor idea that got heavily patched over. ```Note.java```, where all that happens, is ugly.
 
-As I said in the previous release notes, there's no point continuing with this design from a musical standpoint. I'm glad however that I made the GUI because it embodies a simple design where the form is separate from the rendering, with a single function call being the point of interchange (```Manifester.bust```). This is inspired by reading Drumsynth's source code.
+As I said in the previous release notes, there's no point continuing with this design from a musical standpoint. I'm glad however that I made the GUI because it embodies a simple design where the form is separate from the rendering, with a single function call being the point of interchange (```Manifester.bust(SourceDataLine out, boolean save, float targBpm, int subdivision, int[] seq, Articulation.Env env, int length, Wave.Form form, Fraction folding)```). This is inspired by reading Drumsynth's source code.
 
 Kevin Higgins, 08/07/20
 
